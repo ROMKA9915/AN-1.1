@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_post_menu"
-        android:src="@drawable/baseline_more_vert_24"
+        android:src="@drawable/ic_more_vert_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -80,7 +80,7 @@
         android:layout_marginTop="16dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_likes"
-        android:src="@drawable/baseline_like_24"
+        android:src="@drawable/ic_like_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/barrierBottom" />
 
@@ -92,18 +92,18 @@
         app:layout_constraintBottom_toBottomOf="@id/likes"
         app:layout_constraintStart_toEndOf="@id/likes"
         app:layout_constraintTop_toTopOf="@id/likes"
-        tools:text="@sample/posts.json/data/likes" />
+        tools:text="@sample/posts.json/data/likes[0]" />
 
     <ImageButton
         android:id="@+id/shares"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_shares"
-        android:src="@drawable/baseline_share_24"
-        app:layout_constraintStart_toEndOf="@id/likes"
+        android:src="@drawable/ic_share_24"
+        app:layout_constraintStart_toEndOf="@id/like_count"
         app:layout_constraintTop_toTopOf="@id/barrierBottom" />
 
     <TextView
@@ -120,10 +120,10 @@
         android:id="@+id/views_count"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/views"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/views"
-        app:layout_constraintBottom_toBottomOf="@id/views"
-        tools:text="@sample/posts.json/data/views" />
+        tools:text="@sample/posts.json/data/views[0]" />
 
     <ImageButton
         android:id="@+id/views"
@@ -133,7 +133,7 @@
         android:layout_marginEnd="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_views"
-        android:src="@drawable/baseline_visibility_24"
+        android:src="@drawable/ic_visibility_24"
         app:layout_constraintEnd_toStartOf="@id/views_count"
         app:layout_constraintTop_toTopOf="@id/barrierBottom" />
 
