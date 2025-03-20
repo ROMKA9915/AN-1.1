@@ -69,14 +69,6 @@ class MainActivity : AppCompatActivity() {
                 shareCount.text = scaleNumbers(shareCount.text.toString())
                 println("поделиться")
             }
-
-            root.setOnClickListener {
-                post.shares ++
-                viewsCount.text = post.shares.toString()
-                println("рут")
-            }
-
-
         }
 
     }
