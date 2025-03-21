@@ -8,6 +8,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
+import java.math.RoundingMode
 import kotlin.math.round
 
 class MainActivity : AppCompatActivity() {
@@ -79,15 +80,15 @@ fun scaleNumbers(number: String): String {
     var scaledNumber = number
     if (number.toInt() >= 1_000_000) {
         if (number.toInt()/1_000_000 <= 9) {
-            scaledNumber = String.format("%.1f", (number.toDouble() / 1_000_000)).toString() + "M"
+            scaledNumber = (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "M"
         } else {
-            scaledNumber = (number.toInt() / 1_000_000).toString() + "M"
+            scaledNumber = (number.toInt() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "M"
         }
     } else if (number.toInt() >= 1_000) {
         if (number.toInt()/1_000 <= 9) {
-            scaledNumber = String.format("%.1f", (number.toDouble() / 1_000)).toString() + "K"
+            scaledNumber = (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "K"
         } else {
-            scaledNumber = (number.toInt() / 1_000).toString() + "K"
+            scaledNumber = (number.toInt() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "K"
         }
     }
     return scaledNumber
