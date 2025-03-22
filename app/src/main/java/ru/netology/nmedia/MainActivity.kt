@@ -9,7 +9,6 @@ import androidx.core.view.WindowInsetsCompat
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
 import java.math.RoundingMode
-import kotlin.math.round
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
@@ -30,7 +29,8 @@ class MainActivity : AppCompatActivity() {
             "Нетология. Университет интернет-профессий будущего",
             "21 мая в 18:36",
             "Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb",
-            false
+            false,
+            avatar = R.drawable.ic_avatar_512
         )
 
         with(binding) {
@@ -40,14 +40,19 @@ class MainActivity : AppCompatActivity() {
             likeCount.text = post.likes.toString()
             shareCount.text = post.shares.toString()
             viewsCount.text = post.views.toString()
+            avatar.setImageResource(post.avatar)
 
-            likes.setImageResource(R.drawable.ic_like_24)
+            if (!post.likedByMe) {
+                likes.setImageResource(R.drawable.ic_like_24)
+            } else {
+                likes.setImageResource(R.drawable.ic_liked_24)
+            }
+
             likeCount.text = scaleNumbers(likeCount.text.toString())
             shareCount.text = scaleNumbers(shareCount.text.toString())
 
             likes.setOnClickListener {
                 post.likedByMe = !post.likedByMe
-                println("лайк")
 
                 likes.setImageResource(
                     if (post.likedByMe) {
@@ -68,7 +73,6 @@ class MainActivity : AppCompatActivity() {
                 post.shares ++
                 shareCount.text = post.shares.toString()
                 shareCount.text = scaleNumbers(shareCount.text.toString())
-                println("поделиться")
             }
         }
 
@@ -82,13 +86,13 @@ fun scaleNumbers(number: String): String {
         if (number.toInt()/1_000_000 <= 9) {
             scaledNumber = (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "M"
         } else {
-            scaledNumber = (number.toInt() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "M"
+            scaledNumber = (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toInt().toString() + "M"
         }
     } else if (number.toInt() >= 1_000) {
         if (number.toInt()/1_000 <= 9) {
             scaledNumber = (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "K"
         } else {
-            scaledNumber = (number.toInt() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toString() + "K"
+            scaledNumber = (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toInt().toString() + "K"
         }
     }
     return scaledNumber

@@ -8,5 +8,6 @@ data class Post(
     var likedByMe: Boolean,
     var likes: Long = 0,
     var shares: Long = 0,
-    var views: Long = 0
+    var views: Long = 0,
+    val avatar: Int
 )
