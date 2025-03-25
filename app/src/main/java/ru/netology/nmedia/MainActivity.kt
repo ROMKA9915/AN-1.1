@@ -3,15 +3,18 @@ package ru.netology.nmedia
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.repository.PostViewModel
 import java.math.RoundingMode
 
 class MainActivity : AppCompatActivity() {
-    @SuppressLint("SetTextI18n")
+
+    private val viewModel: PostViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -24,55 +27,42 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val post = Post(
-            1,
-            "Нетология. Университет интернет-профессий будущего",
-            "21 мая в 18:36",
-            "Привет, это новая Нетология! Когда-то Нетология начиналась с интенсивов по онлайн-маркетингу. Затем появились курсы по дизайну, разработке, аналитике и управлению. Мы растём сами и помогаем расти студентам: от новичков до уверенных профессионалов. Но самое важное остаётся с нами: мы верим, что в каждом уже есть сила, которая заставляет хотеть больше, целиться выше, бежать быстрее. Наша миссия — помочь встать на путь роста и начать цепочку перемен → http://netolo.gy/fyb",
-            false,
-            avatar = R.drawable.ic_avatar_512
-        )
+        viewModel.data.observe(this) { post ->
+            with(binding) {
+                author.text = post.author
+                published.text = post.published
+                content.text = post.content
+                avatar.setImageResource(post.avatar)
 
-        with(binding) {
-            author.text = post.author
-            published.text = post.published
-            content.text = post.content
-            likeCount.text = post.likes.toString()
-            shareCount.text = post.shares.toString()
-            viewsCount.text = post.views.toString()
-            avatar.setImageResource(post.avatar)
+                if (post.likedByMe) likes.setImageResource(R.drawable.ic_liked_24) else likes.setImageResource(R.drawable.ic_like_24)
 
-            if (!post.likedByMe) {
-                likes.setImageResource(R.drawable.ic_like_24)
-            } else {
-                likes.setImageResource(R.drawable.ic_liked_24)
+                likeCount.text = scaleNumbers(post.likes.toString())
+                shareCount.text = scaleNumbers(post.shares.toString())
+                viewsCount.text = scaleNumbers(post.views.toString())
             }
 
-            likeCount.text = scaleNumbers(likeCount.text.toString())
-            shareCount.text = scaleNumbers(shareCount.text.toString())
-
-            likes.setOnClickListener {
-                post.likedByMe = !post.likedByMe
-
-                likes.setImageResource(
-                    if (post.likedByMe) {
-                        post.likes++
-                        likeCount.text = post.likes.toString()
-                        likeCount.text = scaleNumbers(likeCount.text.toString())
-                        R.drawable.ic_liked_24
-                    } else {
-                        post.likes--
-                        likeCount.text = post.likes.toString()
-                        likeCount.text = scaleNumbers(likeCount.text.toString())
-                        R.drawable.ic_like_24
-                    }
-                )
+            binding.likes.setOnClickListener {
+                if(post.likedByMe) {
+                    viewModel.disliked()
+                    binding.likeCount.text = scaleNumbers(post.likes.toString())
+                } else {
+                    viewModel.liked()
+                    binding.likeCount.text = scaleNumbers(post.likes.toString())
+                }
+                viewModel.like()
             }
 
-            shares.setOnClickListener {
-                post.shares ++
-                shareCount.text = post.shares.toString()
-                shareCount.text = scaleNumbers(shareCount.text.toString())
+            binding.likes.setImageResource(
+                if (post.likedByMe) {
+                    R.drawable.ic_liked_24
+                } else {
+                    R.drawable.ic_like_24
+                }
+            )
+
+            binding.shares.setOnClickListener {
+                viewModel.shared()
+                binding.shareCount.text = scaleNumbers(post.shares.toString())
             }
         }
 
