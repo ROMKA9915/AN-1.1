@@ -1,5 +1,7 @@
 package ru.netology.nmedia.dto
 
+import ru.netology.nmedia.R
+
 data class Post(
     val id: Long,
     val author: String,
@@ -9,5 +11,5 @@ data class Post(
     val likes: Long = 0,
     val shares: Long = 0,
     val views: Long = 0,
-    val avatar: Int
+    val avatar: Int = R.drawable.ic_avatar_512
 )
