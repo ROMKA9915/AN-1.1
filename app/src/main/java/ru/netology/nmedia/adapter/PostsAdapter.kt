@@ -1,21 +1,27 @@
 package ru.netology.nmedia.adapter
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.MediaController
 import androidx.appcompat.widget.PopupMenu
+import androidx.constraintlayout.widget.Group
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.scaleNumbers
+import ru.netology.nmedia.activity.scaleNumbers
+import androidx.core.net.toUri
 
 interface OnInteractionListener {
     fun onLike(post: Post)
     fun onShare(post: Post)
     fun onRemove(post: Post)
     fun onEdit(post: Post)
+    fun onVideo(post: Post)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
@@ -55,6 +61,14 @@ class PostViewHolder(
 
         shares.setOnClickListener {
             onInteractionListener.onShare(post)
+        }
+
+        if (post.video?.isNotEmpty() == true) {
+            video.visibility = Group.VISIBLE
+        }
+
+        videoImage.setOnClickListener {
+            onInteractionListener.onVideo(post)
         }
 
         menu.setOnClickListener {

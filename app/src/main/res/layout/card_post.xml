@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp"
-    tools:context=".MainActivity">
+    tools:context=".activity.MainActivity">
 
     <ImageView
         android:id="@+id/avatar"
@@ -66,6 +66,31 @@
         app:layout_constraintTop_toBottomOf="@id/barrierTop"
         tools:text="@sample/posts.json/data/content" />
 
+    <ImageView
+        android:id="@+id/video_image"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:src="@drawable/gray_background"
+        app:layout_constraintBottom_toTopOf="@id/barrierBottom"
+        app:layout_constraintTop_toBottomOf="@+id/content" />
+
+    <ImageView
+        android:id="@+id/play"
+        android:layout_width="@dimen/avatar_size"
+        android:layout_height="@dimen/avatar_size"
+        android:src="@drawable/ic_play_arrow_24"
+        app:layout_constraintTop_toTopOf="@id/video_image"
+        app:layout_constraintBottom_toBottomOf="@id/video_image"
+        app:layout_constraintStart_toStartOf="@id/video_image"
+        app:layout_constraintEnd_toEndOf="@id/video_image"/>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/video"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="video_image, play"/>
+
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrierBottom"
         android:layout_width="wrap_content"
@@ -84,7 +109,7 @@
         app:icon="@drawable/ic_like_selector"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/barrierBottom"
-        tools:text="35"/>
+        tools:text="35" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/shares"
@@ -97,7 +122,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/likes"
         app:layout_constraintStart_toEndOf="@id/likes"
         app:layout_constraintTop_toTopOf="@+id/likes"
-        tools:text="25"/>
+        tools:text="25" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/views"

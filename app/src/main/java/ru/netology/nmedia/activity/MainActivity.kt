@@ -1,21 +1,24 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
+import android.widget.ImageView
+import android.widget.MediaController
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.Group
+import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.repository.PostViewModel
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.util.AndroidUtils
+import ru.netology.nmedia.repository.PostViewModel
 import java.math.RoundingMode
 
 class MainActivity : AppCompatActivity() {
@@ -45,8 +48,22 @@ class MainActivity : AppCompatActivity() {
                 viewModel.likeById(post.id)
             }
 
+            val editPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
+                result ?: return@registerForActivityResult
+                viewModel.changeContent(result)
+                viewModel.save()
+            }
+
             override fun onShare(post: Post) {
                 viewModel.shareById(post.id)
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                    type = "text/plain"
+                }
+                val sharedIntent =
+                    Intent.createChooser(intent, getString(R.string.chooser_share_post))
+                startActivity(sharedIntent)
             }
 
             override fun onRemove(post: Post) {
@@ -54,9 +71,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onEdit(post: Post) {
+                editPostLauncher.launch(post.content)
                 viewModel.edit(post)
-                binding.editedPost.text = post.content
-                binding.editGroup.visibility = Group.VISIBLE
+            }
+
+            override fun onVideo(post: Post) {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(post.video)))
             }
         })
 
@@ -70,33 +90,14 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.edited.observe(this) {
-            if (it.id != 0L) {
-                binding.content.setText(it.content)
-                binding.content.requestFocus()
-            }
+        val newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
+            result ?: return@registerForActivityResult
+            viewModel.changeContent(result)
+            viewModel.save()
         }
 
-        binding.add.setOnClickListener {
-            val text = binding.content.text.toString()
-            if (text.isBlank()) {
-                Toast.makeText(this, R.string.error_empty_content, Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
-            viewModel.changeContentAndSave(text)
-
-                binding.content.setText("")
-            binding.editGroup.visibility = Group.GONE
-            binding.content.clearFocus()
-            AndroidUtils.hideKeyboard(it)
-        }
-
-        binding.cancelEdit.setOnClickListener {
-            viewModel.clearEdit()
-            binding.editGroup.visibility = Group.GONE
-            binding.content.setText("")
-            binding.content.clearFocus()
-            AndroidUtils.hideKeyboard(it)
+        binding.fab.setOnClickListener {
+            newPostLauncher.launch("")
         }
     }
 }
