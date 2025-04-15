@@ -16,4 +16,5 @@
     <string name="menu_edit">Редактировать</string>
     <string name="error_empty_content">Строка не может быть пустой</string>
     <string name="chooser_share_post">Поделиться</string>
+    <string name="description_post_save">Сохранить</string>
 </resources>
