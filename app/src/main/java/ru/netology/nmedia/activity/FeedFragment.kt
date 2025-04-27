@@ -4,32 +4,32 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ImageView
-import android.widget.MediaController
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.Group
-import androidx.core.net.toUri
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.repository.PostViewModel
 import java.math.RoundingMode
 
-class MainActivity : AppCompatActivity() {
+class FeedFragment : Fragment() {
 
-    private val viewModel: PostViewModel by viewModels()
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        val binding = FragmentFeedBinding.inflate(inflater, container, false)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -46,12 +46,6 @@ class MainActivity : AppCompatActivity() {
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onLike(post: Post) {
                 viewModel.likeById(post.id)
-            }
-
-            val editPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
-                result ?: return@registerForActivityResult
-                viewModel.changeContent(result)
-                viewModel.save()
             }
 
             override fun onShare(post: Post) {
@@ -71,17 +65,24 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onEdit(post: Post) {
-                editPostLauncher.launch(post.content)
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_newPostFragment,
+                    Bundle().apply { textArg = post.content })
                 viewModel.edit(post)
             }
 
             override fun onVideo(post: Post) {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(post.video)))
             }
+
+            override fun onSinglePost(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_singlePostFragment, Bundle().apply { textArg =post.id.toString() })
+            }
         })
 
         binding.list.adapter = adapter
-        viewModel.data.observe(this) { posts ->
+        viewModel.data.observe(viewLifecycleOwner) { posts ->
             val newPost = adapter.currentList.size < posts.size
             adapter.submitList(posts) {
                 if (newPost) {
@@ -90,15 +91,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val newPostLauncher = registerForActivityResult(NewPostResultContract) { result ->
-            result ?: return@registerForActivityResult
-            viewModel.changeContent(result)
-            viewModel.save()
+        binding.fab.setOnClickListener {
+            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
-        binding.fab.setOnClickListener {
-            newPostLauncher.launch("")
-        }
+        return binding.root
     }
 }
 

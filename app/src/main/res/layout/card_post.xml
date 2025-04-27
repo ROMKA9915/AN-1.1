@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.FeedFragment">
 
     <ImageView
         android:id="@+id/avatar"
@@ -59,7 +59,7 @@
 
     <TextView
         android:id="@+id/content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:autoLink="web"
