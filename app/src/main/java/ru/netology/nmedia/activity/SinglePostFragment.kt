@@ -25,7 +25,7 @@ class SinglePostFragment : Fragment() {
         val binding = SinglePostBinding.inflate(inflater, container, false)
         val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
-        val adapter = object : OnInteractionListener {
+        val onInteractionListener = object : OnInteractionListener {
             override fun onLike(post: Post) {
                 viewModel.likeById(post.id)
             }
@@ -62,7 +62,7 @@ class SinglePostFragment : Fragment() {
             }
         }
 
-        val postViewHolder = PostViewHolder(binding.singlePost, adapter)
+        val postViewHolder = PostViewHolder(binding.singlePost, onInteractionListener)
 
         val postId = arguments?.textArg?.toInt()
 
