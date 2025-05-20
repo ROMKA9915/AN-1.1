@@ -14,7 +14,9 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
             ${PostColumns.COLUMN_CONTENT} TEXT NOT NULL,
             ${PostColumns.COLUMN_PUBLISHED} TEXT NOT NULL,
             ${PostColumns.COLUMN_LIKED_BY_ME} BOOLEAN NOT NULL DEFAULT 0,
-            ${PostColumns.COLUMN_LIKES} INTEGER NOT NULL DEFAULT 0
+            ${PostColumns.COLUMN_LIKES} INTEGER NOT NULL DEFAULT 0,
+            ${PostColumns.COLUMN_SHARES} INTEGER NOT NULL DEFAULT 0,
+            ${PostColumns.COLUMN_VIDEO} TEXT DEFAULT NULL
         );
         """.trimIndent()
     }
@@ -27,13 +29,17 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
         const val COLUMN_PUBLISHED = "published"
         const val COLUMN_LIKED_BY_ME = "likedByMe"
         const val COLUMN_LIKES = "likes"
+        const val COLUMN_SHARES = "shares"
+        const val COLUMN_VIDEO = "video"
         val ALL_COLUMNS = arrayOf(
             COLUMN_ID,
             COLUMN_AUTHOR,
             COLUMN_CONTENT,
             COLUMN_PUBLISHED,
             COLUMN_LIKED_BY_ME,
-            COLUMN_LIKES
+            COLUMN_LIKES,
+            COLUMN_SHARES,
+            COLUMN_VIDEO
         )
     }
 
@@ -102,7 +108,7 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
         db.execSQL(
             """
            UPDATE posts SET
-               shares = shares + 1
+               shares = shares + 1 WHERE id = ?;
         """.trimIndent(), arrayOf(id)
         )
     }
@@ -124,6 +130,8 @@ class PostDaoImpl(private val db: SQLiteDatabase) : PostDao {
                 published = getString(getColumnIndexOrThrow(PostColumns.COLUMN_PUBLISHED)),
                 likedByMe = getInt(getColumnIndexOrThrow(PostColumns.COLUMN_LIKED_BY_ME)) != 0,
                 likes = getLong(getColumnIndexOrThrow(PostColumns.COLUMN_LIKES)),
+                shares = getLong(getColumnIndexOrThrow(PostColumns.COLUMN_SHARES)),
+                 video = getString(getColumnIndexOrThrow(PostColumns.COLUMN_VIDEO))
             )
         }
     }
