@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="App.Widget.Buttons" parent="Widget.Material3.Button.IconButton">
+        <item name="iconTint">@color/color_like_selector</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="iconSize">@dimen/ic_size</item>
+        <item name="android:textColor">?attr/colorControlNormal</item>
+        <item name="iconPadding">8dp</item>
+    </style>
+
+    <style name="App.Widget.Menu" parent="Widget.Material3.Button.IconButton">
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="iconSize">@dimen/ic_size</item>
+    </style>
+</resources>
