@@ -6,4 +6,18 @@
     <string name="description_likes">Likes</string>
     <string name="description_shares">Shares</string>
     <string name="description_views">Visibilities</string>
+    <string name="description_save">Save</string>
+    <string name="description_edit">Edit</string>
+    <string name="description_cancel_edit">Cancel edit</string>
+    <string name="edit_post"><b>Edit post</b></string>
+    <string name="post_text">Post text</string>
+    <string name="menu_remove">Remove</string>
+    <string name="menu_edit">Edit</string>
+    <string name="error_empty_content">Content can\'t be empty</string>
+    <string name="chooser_share_post">Share post</string>
+    <string name="description_post_save">Save</string>
+    <string name="channel_remote_name">Server notifications</string>
+    <string name="channel_remote_description">Notifications from remote server</string>
+    <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
+    <string name="notification_user_new_posted">%1$s posted a new post</string>
 </resources>
