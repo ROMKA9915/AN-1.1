@@ -17,4 +17,8 @@
     <string name="error_empty_content">Строка не может быть пустой</string>
     <string name="chooser_share_post">Поделиться</string>
     <string name="description_post_save">Сохранить</string>
+    <string name="channel_remote_name">Уведомление сервера</string>
+    <string name="channel_remote_description">Уведомление с удаленного сервера</string>
+    <string name="notification_user_liked">Пользователю %1$s понравился %2$s\\\'s пост</string>
+    <string name="notification_user_new_posted">%1$s выложил новый пост</string>
 </resources>
