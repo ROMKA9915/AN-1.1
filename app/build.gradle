@@ -28,6 +28,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            manifestPlaceholders.usesCleartextTraffic = true
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -52,6 +55,7 @@ dependencies {
     def gson_version = "2.13.1"
     def nav_version = "2.9.0"
     def room_version = "2.7.1"
+    def okhttp_version = "4.12.0"
 
     implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
@@ -66,6 +70,7 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation platform("com.google.firebase:firebase-bom:33.14.0")
     implementation "com.google.firebase:firebase-messaging-ktx:24.1.1"
     implementation "com.google.android.gms:play-services-ads-base:24.1.0"

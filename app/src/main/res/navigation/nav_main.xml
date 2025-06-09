@@ -23,7 +23,7 @@
         tools:layout="@layout/fragment_new_post" />
     <fragment
         android:id="@+id/singlePostFragment"
-        android:name="ru.netology.nmedia.activity.SinglePostFragment"
+        android:name="ru.netology.nmedia.activity.NewPostFragment"
         android:label="SinglePostFragment" >
         <action
             android:id="@+id/action_singlePostFragment_to_newPostFragment"

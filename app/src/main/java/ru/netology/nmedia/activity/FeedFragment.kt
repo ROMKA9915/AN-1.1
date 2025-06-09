@@ -9,8 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
@@ -18,7 +19,7 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.repository.PostViewModel
+import ru.netology.nmedia.viewmodel.PostViewModel
 import java.math.RoundingMode
 
 class FeedFragment : Fragment() {
@@ -28,7 +29,7 @@ class FeedFragment : Fragment() {
     ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
 
-        val viewModel: PostViewModel by viewModels(ownerProducer = ::requireParentFragment)
+        val viewModel: PostViewModel by activityViewModels()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -49,7 +50,6 @@ class FeedFragment : Fragment() {
             }
 
             override fun onShare(post: Post) {
-                viewModel.shareById(post.id)
                 val intent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, post.content)
@@ -77,18 +77,22 @@ class FeedFragment : Fragment() {
 
             override fun onSinglePost(post: Post) {
                 findNavController().navigate(
-                    R.id.action_feedFragment_to_singlePostFragment, Bundle().apply { textArg =post.id.toString() })
+                    R.id.action_feedFragment_to_singlePostFragment,
+                    Bundle().apply { textArg = post.id.toString() })
             }
         })
 
         binding.list.adapter = adapter
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            val newPost = adapter.currentList.size < posts.size
-            adapter.submitList(posts) {
-                if (newPost) {
-                    binding.list.scrollToPosition(0)
-                }
-            }
+
+        viewModel.data.observe(viewLifecycleOwner) { state ->
+            adapter.submitList(state.posts)
+            binding.progress.isVisible = state.loading
+            binding.errorGroup.isVisible = state.error
+            binding.emptyText.isVisible = state.empty
+        }
+
+        binding.retryButton.setOnClickListener {
+            viewModel.loadPosts()
         }
 
         binding.fab.setOnClickListener {
