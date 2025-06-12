@@ -54,8 +54,6 @@ class PostViewHolder(
         shares.text = scaleNumbers(post.shares.toString())
         views.text = scaleNumbers(post.views.toString())
 
-        avatar.setImageResource(post.avatar)
-
         likes.setOnClickListener {
             onInteractionListener.onLike(post)
         }
