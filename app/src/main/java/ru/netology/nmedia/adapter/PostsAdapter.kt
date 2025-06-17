@@ -3,6 +3,7 @@ package ru.netology.nmedia.adapter
 import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.MediaController
 import androidx.appcompat.widget.PopupMenu
@@ -15,6 +16,7 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.activity.scaleNumbers
 import androidx.core.net.toUri
+import com.bumptech.glide.Glide
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -94,6 +96,32 @@ class PostViewHolder(
                 }
             }.show()
         }
+
+        val avatarUrl = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+        Glide.with(binding.avatar)
+            .load(avatarUrl)
+            .placeholder(R.drawable.ic_avatar_placeholder)
+            .circleCrop()
+            .override(100, 100)
+            .timeout(5_000)
+            .into(binding.avatar)
+
+
+        if (post.attachment != null && post.attachment.type == "IMAGE") {
+            binding.attachmentImageView.visibility = View.VISIBLE
+
+            val imageUrl = "http://10.0.2.2:9999/images/${post.attachment.url}"
+            Glide.with(binding.attachmentImageView)
+                .load(imageUrl)
+                .placeholder(R.drawable.gray_background)
+                .error(R.drawable.ic_broken_image)
+                .timeout(6_000)
+                .into(binding.attachmentImageView)
+
+        } else {
+            binding.attachmentImageView.visibility = View.GONE
+        }
+
     }
 }
 

@@ -10,5 +10,12 @@ data class Post(
     val likes: Long = 0,
     val shares: Long = 0,
     val views: Long = 0,
-    val video: String? = null
+    val video: String? = null,
+    val attachment: Attachment? = null
+)
+
+data class Attachment(
+    val url: String,
+    val description: String,
+    val type: String
 )
