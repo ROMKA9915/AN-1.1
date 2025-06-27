@@ -1,9 +1,11 @@
 package ru.netology.nmedia.repository
 
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dto.Post
@@ -20,24 +22,39 @@ class PostRepositoryImpl: PostRepository {
     }
 
     override fun getAllAsync(callback: PostRepository.GetAllCallBack) {
-
         ApiService.service.getAll()
-            .enqueue(object: Callback<List<Post>> {
+            .enqueue(object : Callback<List<Post>> {
                 override fun onResponse(
                     call: Call<List<Post>>,
                     response: Response<List<Post>>
                 ) {
-                    val body = response.body() ?: run {
-                        callback.onError(RuntimeException("body is null"))
-                        return
+                    when {
+                        // Успешный ответ (200-299) с данными
+                        response.isSuccessful && response.body() != null -> {
+                            callback.onSuccess(response.body()!!)
+                        }
+
+                        // Успешный ответ, но тело пустое (может быть валидным сценарием)
+                        response.isSuccessful -> {
+                            callback.onSuccess(emptyList())
+                        }
+
+                        // Неуспешный ответ (404, 500 и др.)
+                        else -> {
+                            callback.onError(
+                                HttpException(response).apply {
+                                    Log.w("API", "HTTP ${response.code()}: ${response.errorBody()?.string()}")
+                                }
+                            )
+                        }
                     }
-                    callback.onSuccess(body)
                 }
 
                 override fun onFailure(
                     call: Call<List<Post>>,
                     throwable: Throwable
                 ) {
+                    Log.e("API", "Network error", throwable)
                     callback.onError(throwable)
                 }
             })
