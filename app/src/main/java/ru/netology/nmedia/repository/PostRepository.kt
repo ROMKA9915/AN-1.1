@@ -17,11 +17,11 @@ interface PostRepository {
 
     interface GetAllCallBack {
         fun onSuccess (post: List<Post>)
-        fun onError (e: Exception)
+        fun onError (e: Throwable)
     }
 
     interface CallBackById<T> {
         fun onSuccess (result: T)
-        fun onError (e: Exception)
+        fun onError (e: Throwable)
     }
 }
