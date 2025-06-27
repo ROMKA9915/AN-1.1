@@ -25,6 +25,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post)
     fun onVideo(post: Post)
     fun onSinglePost(post: Post)
+    fun onError(exception: Exception)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :

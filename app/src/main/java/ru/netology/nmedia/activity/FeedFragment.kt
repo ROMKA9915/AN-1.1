@@ -80,6 +80,12 @@ class FeedFragment : Fragment() {
                     R.id.action_feedFragment_to_singlePostFragment,
                     Bundle().apply { textArg = post.id.toString() })
             }
+
+            override fun onError(exception: Exception) {
+                    binding.retryTitle.text = "Ошибка: ${exception.message}"
+                    binding.retryButton.visibility = View.VISIBLE
+                    binding.retryButton.setOnClickListener { viewModel.loadPosts() }
+            }
         })
 
         binding.list.adapter = adapter

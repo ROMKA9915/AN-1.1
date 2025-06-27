@@ -8,6 +8,7 @@ import retrofit2.Callback
 import retrofit2.HttpException
 import retrofit2.Response
 import ru.netology.nmedia.api.ApiService
+import ru.netology.nmedia.data.*
 import ru.netology.nmedia.dto.Post
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -29,33 +30,19 @@ class PostRepositoryImpl: PostRepository {
                     response: Response<List<Post>>
                 ) {
                     when {
-                        // Успешный ответ (200-299) с данными
-                        response.isSuccessful && response.body() != null -> {
-                            callback.onSuccess(response.body()!!)
-                        }
-
-                        // Успешный ответ, но тело пустое (может быть валидным сценарием)
                         response.isSuccessful -> {
-                            callback.onSuccess(emptyList())
+                            val body = response.body() ?: emptyList()
+                            callback.onSuccess(body)
                         }
-
-                        // Неуспешный ответ (404, 500 и др.)
-                        else -> {
-                            callback.onError(
-                                HttpException(response).apply {
-                                    Log.w("API", "HTTP ${response.code()}: ${response.errorBody()?.string()}")
-                                }
-                            )
-                        }
+                        response.code() == 401 -> callback.onError(AuthRequiredException())
+                        response.code() == 404 -> callback.onError(NotFoundException())
+                        response.code() in 500..599 -> callback.onError(ServerErrorException())
+                        else -> callback.onError(ApiException("Ошибка ${response.code()}"))
                     }
                 }
 
-                override fun onFailure(
-                    call: Call<List<Post>>,
-                    throwable: Throwable
-                ) {
-                    Log.e("API", "Network error", throwable)
-                    callback.onError(throwable)
+                override fun onFailure(call: Call<List<Post>>, t: Throwable) {
+                    callback.onError(NetworkException())
                 }
             })
     }
