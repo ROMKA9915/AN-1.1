@@ -28,13 +28,19 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 interface PostApi {
-@GET("posts")
-fun getAll(): Call<List<Post>>
+    @GET("posts")
+    fun getAll(): Call<List<Post>>
 
     @POST("posts")
     fun save(@Body post: Post): Call<Post>
 
-    @DELETE ("posts/{id}")
+    @POST("posts/{id}/likes")
+    fun likeById(@Path("id") id: Long): Call<Post>
+
+    @DELETE("posts/{id}/likes")
+    fun dislikeById(@Path("id") id: Long): Call<Post>
+
+    @DELETE("posts/{id}")
     fun deleteById(@Path("id") id: Long): Call<Unit>
 }
 
