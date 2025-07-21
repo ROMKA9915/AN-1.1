@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -81,24 +82,29 @@ class FeedFragment : Fragment() {
                     Bundle().apply { textArg = post.id.toString() })
             }
 
-            override fun onError(exception: Exception) {
-                    binding.retryTitle.text = "Ошибка: ${exception.message}"
-                    binding.retryButton.visibility = View.VISIBLE
-                    binding.retryButton.setOnClickListener { viewModel.loadPosts() }
-            }
         })
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
-            binding.emptyText.isVisible = state.empty
+        viewModel.data.observe(viewLifecycleOwner) { data ->
+            adapter.submitList(data.posts)
+            binding.emptyText.isVisible = data.empty
         }
 
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
+        viewModel.state.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        viewModel.loadPosts()
+                    }
+                    .show()
+            }
+            binding.swiperefresh.isRefreshing = state.refreshing
+        }
+
+        binding.swiperefresh.setOnRefreshListener {
+            viewModel.refresh()
         }
 
         binding.fab.setOnClickListener {

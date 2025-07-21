@@ -23,5 +23,6 @@
     <string name="error_loading">Something went wrong. Try again later</string>
     <string name="retry_loading">Retry</string>
     <string name="empty_posts">There are no posts. If you create a new post, it will appear here</string>
-
+    <string name="description_logo">Logo</string>
+    <string name="load">Load</string>
 </resources>
