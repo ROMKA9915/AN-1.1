@@ -37,6 +37,9 @@ class PostRepositoryImpl(private val dao: PostDao): PostRepository {
         }
     }
     override suspend fun save(post: Post) {
-        TODO("Not yet implemented")
-    }
+        try {
+            PostsApi.service.save(post)
+        } catch (e: Exception) {
+            throw Exception("Save operation failed", e)
+        }    }
 }
