@@ -25,4 +25,12 @@
     <string name="empty_posts">There are no posts. If you create a new post, it will appear here</string>
     <string name="description_logo">Logo</string>
     <string name="load">Load</string>
+    <string name="new_posts_available">%d new posts</string>
+    <string name="new_posts_loaded">Load %d new posts</string>
+    <string name="loading_new_posts">Load new posts…</string>
+    <string name="new_posts_error">Error load new posts</string>
+    <string name="load_new_posts">Load</string>
+    <string name="show_new_posts">Show</string>
+    <string name="retry">Retry</string>
+    <string name="new_posts">New posts</string>
 </resources>

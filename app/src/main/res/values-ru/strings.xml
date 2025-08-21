@@ -26,4 +26,12 @@
     <string name="empty_posts">Постов нет. Если высоздадите новый пост, он появится здесь</string>
     <string name="description_logo">Лого</string>
     <string name="load">Загрузить</string>
+    <string name="new_posts_available">%d новых записей</string>
+    <string name="new_posts_loaded">Загружено %d новых записей</string>
+    <string name="loading_new_posts">Загрузка новых записей…</string>
+    <string name="new_posts_error">Ошибка загрузки новых записей</string>
+    <string name="load_new_posts">Загрузить</string>
+    <string name="show_new_posts">Показать</string>
+    <string name="retry">Повторить</string>
+    <string name="new_posts">Новые записи</string>
 </resources>
