@@ -12,6 +12,9 @@ interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    suspend fun getAllAsync(): List<PostEntity>
+
     @Insert (onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
 
@@ -37,10 +40,4 @@ interface PostDao {
 
     @Query("DELETE FROM PostEntity WHERE id = :id")
     suspend fun removeById(id: Long)
-
-    @Query("SELECT MAX(id) FROM PostEntity")
-    suspend fun getLatestPostId(): Long?
-
-    @Query("SELECT COUNT(*) FROM PostEntity WHERE id > :sinceId")
-    suspend fun getNewPostsCount(sinceId: Long): Int
 }

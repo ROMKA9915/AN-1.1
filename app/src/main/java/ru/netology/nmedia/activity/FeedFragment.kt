@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,21 +14,25 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.repository.NewPostsState
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.math.RoundingMode
 
 class FeedFragment : Fragment() {
-
-    private var newPostsSnackbar: Snackbar? = null
 
     lateinit var binding: FragmentFeedBinding
 
@@ -97,20 +99,25 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { data ->
-            adapter.submitList(data.posts)   // Вызывать функцию при нажатии на кнопку к новым постам
-            binding.emptyText.isVisible = data.empty
+        lifecycleScope.launch {
+            val initialPosts = viewModel.loadAllPosts()
+            adapter.submitList(initialPosts)
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
+        viewModel.data.onEach { data ->
+            // adapter.submitList(data.posts)   // Вызывать функцию при нажатии на кнопку к новым постам
+            binding.emptyText.isVisible = data.empty
+        }.launchIn(lifecycleScope)
+
+        viewModel.newerCount.onEach {
             if (it > 0) {
                 binding.newerPost.visibility = View.VISIBLE
             } else {
                 binding.newerPost.visibility = View.GONE
             }
 
-            //println(it) // Проверять кол-во новых постов. Если > 0 то показывать кнопку к новым постам, иначе скрывать кнопку
-        }
+            println(it) // Проверять кол-во новых постов. Если > 0 то показывать кнопку к новым постам, иначе скрывать кнопку
+        }.launchIn(lifecycleScope)
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
@@ -124,10 +131,22 @@ class FeedFragment : Fragment() {
             binding.swipeRefresh.isRefreshing = state.refreshing
         }
 
-        binding.newerPost.setOnClickListener {
-            viewModel.data.value?.let {
-                adapter.submitList(it.posts)
+        binding.recyclerView.setLayoutManager(LinearLayoutManager(requireContext()))
+
+        viewModel.viewListOfPosts.onEach {
+            adapter.submitList(it)
+            lifecycleScope.launch {
+                delay(3000)
+                binding.recyclerView.smoothScrollToPosition(0)
             }
+        }.launchIn(lifecycleScope)
+
+
+        binding.newerPost.setOnClickListener {
+            viewModel.loadViewListOfPosts()
+//            println(viewModel.viewListOfPosts.value.size)
+//            adapter.submitList(viewModel.viewListOfPosts.value)
+//            binding.recyclerView.smoothScrollToPosition(0)
 
             binding.newerPost.visibility = View.GONE
         }
@@ -141,112 +160,6 @@ class FeedFragment : Fragment() {
         }
 
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        observeNewPostsState()
-        setupSwipeRefresh()
-    }
-
-    private fun observeNewPostsState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.newPostsState.collect { state ->
-                when (state) {
-                    is NewPostsState.Available -> showNewPostsAvailable(state.count)
-                    is NewPostsState.Loaded -> showNewPostsLoaded(state.count)
-                    NewPostsState.Hidden -> hideNewPostsIndicator()
-                    NewPostsState.Loading -> showNewPostsLoading()
-                    NewPostsState.Error -> showNewPostsError()
-                }
-            }
-        }
-    }
-
-    private fun showNewPostsAvailable(count: Int) {
-        newPostsSnackbar?.dismiss()
-
-        newPostsSnackbar = Snackbar.make(
-            binding.root,
-            getString(R.string.new_posts_available, count),
-            Snackbar.LENGTH_INDEFINITE
-        ).apply {
-            setAction(R.string.load_new_posts) {
-                viewModel.loadNewPosts()
-            }
-            animationMode = Snackbar.ANIMATION_MODE_SLIDE
-            anchorView = binding.fab // Привязываем к FAB если есть
-            show()
-        }
-    }
-
-    private fun showNewPostsLoaded(count: Int) {
-        newPostsSnackbar?.dismiss()
-
-        newPostsSnackbar = Snackbar.make(
-            binding.root,
-            getString(R.string.new_posts_loaded, count),
-            Snackbar.LENGTH_LONG
-        ).apply {
-            setAction(R.string.show_new_posts) {
-                scrollToTopAndShowNewPosts()
-            }
-            show()
-        }
-    }
-
-    private fun showNewPostsLoading() {
-        newPostsSnackbar?.dismiss()
-
-        newPostsSnackbar = Snackbar.make(
-            binding.root,
-            getString(R.string.loading_new_posts),
-            Snackbar.LENGTH_INDEFINITE
-        ).apply {
-            animationMode = Snackbar.ANIMATION_MODE_FADE
-            show()
-        }
-    }
-
-    private fun showNewPostsError() {
-        newPostsSnackbar?.dismiss()
-
-        newPostsSnackbar = Snackbar.make(
-            binding.root,
-            getString(R.string.new_posts_error),
-            Snackbar.LENGTH_LONG
-        ).apply {
-            setAction(R.string.retry) {
-                viewModel.retryNewPosts()
-            }
-            show()
-        }
-    }
-
-    private fun hideNewPostsIndicator() {
-        newPostsSnackbar?.dismiss()
-        newPostsSnackbar = null
-    }
-
-    private fun scrollToTopAndShowNewPosts() {
-        // Плавный скролл к верху
-        binding.recyclerView.smoothScrollToPosition(0)
-
-        // Показываем новые посты
-        viewModel.showNewPosts()
-    }
-
-    private fun setupSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadPosts()
-            binding.swipeRefresh.isRefreshing = false
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        newPostsSnackbar?.dismiss()
     }
 }
 

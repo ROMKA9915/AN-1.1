@@ -4,23 +4,20 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
-import ru.netology.nmedia.repository.NewPostsState
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
@@ -34,15 +31,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: PostRepository = PostRepositoryImpl(
         AppDb.getInstance(application).postDao
     )
-    private val _data = MutableLiveData(FeedModel())
-    val data: LiveData<FeedModel> = repository.data.map { FeedModel(it, it.isEmpty()) }
+    val data = repository.data.map { FeedModel(it, it.isEmpty()) }
         .catch { it.printStackTrace() }
-        .asLiveData(Dispatchers.Default)
 
-    val newerCount = data.switchMap {
-        repository.getNewer(it.posts.firstOrNull()?.id ?: 0)
+    val viewListOfPosts = repository.data
+
+    val newerCount = viewListOfPosts.flatMapLatest {
+        repository.getNewer(it.firstOrNull()?.id ?: 0)
             .catch { _state.postValue(FeedModelState(error = true)) }
-            .asLiveData(Dispatchers.Default)
     }
     private val _state = MutableLiveData(FeedModelState())
     val state: LiveData<FeedModelState>
@@ -51,22 +47,22 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
-    private val _newPostsState = MutableStateFlow<NewPostsState>(NewPostsState.Hidden)
-    val newPostsState: Flow<NewPostsState> = _newPostsState
-    private var latestPostId: Long = 0L
-    private var newPostsJob: Job? = null
-
 
     init {
         loadPosts()
-        startNewPostsChecker()
+    }
+
+    fun loadViewListOfPosts() {
+        viewModelScope.launch {
+            repository.fetchAll()
+        }
     }
 
     fun loadPosts() {
         _state.value = FeedModelState(loading = true)
         viewModelScope.launch {
             try {
-                repository.getAll()
+                repository.fetchAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)
@@ -74,51 +70,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun startNewPostsChecker() {
-        viewModelScope.launch {
-            // Получаем Flow с количеством новых постов
-            repository.getNewer(latestPostId).collect { count ->
-                if (count > 0) {
-                    _newPostsState.value = NewPostsState.Available(count)
-                }
-            }
-        }
+    suspend fun loadAllPosts(): List<Post> {
+        return repository.getAll()
     }
 
-    fun loadNewPosts() {
-        viewModelScope.launch {
-            _newPostsState.value = NewPostsState.Loading
-            try {
-                val newPostsCount = repository.loadNewPosts(latestPostId).size
-                if (newPostsCount > 0) {
-                    _newPostsState.value = NewPostsState.Loaded(newPostsCount)
-                } else {
-                    _newPostsState.value = NewPostsState.Hidden
-                }
-            } catch (e: Exception) {
-                _newPostsState.value = NewPostsState.Error
-            }
-        }
-    }
-
-    fun showNewPosts() {
-        // Обновляем основной список
-        loadPosts()
-        // Сбрасываем состояние новых постов
-        _newPostsState.value = NewPostsState.Hidden
-        // Перезапускаем проверку с новым latestPostId
-        startNewPostsChecker()
-    }
-
-    fun retryNewPosts() {
-        _newPostsState.value = NewPostsState.Hidden
-        startNewPostsChecker()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        newPostsJob?.cancel()
-    }
 
     fun save() {
         viewModelScope.launch {
@@ -168,7 +123,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _state.value = FeedModelState(refreshing = true)
         viewModelScope.launch {
             try {
-                repository.getAll()
+                repository.fetchAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)
