@@ -12,7 +12,7 @@ interface PostDao {
     @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
-    @Query("UPDATE PostEntity SET isShown = 0")
+    @Query("UPDATE PostEntity SET isShown = 1")
     suspend fun setShownAll()
 
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")

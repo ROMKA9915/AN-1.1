@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.api.PostsApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Post
@@ -30,6 +32,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.fromDtoToEntity())
+            dao.setShownAll()
         } catch (e: Exception) {
             throw NetworkError
         }

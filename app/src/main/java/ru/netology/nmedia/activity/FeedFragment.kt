@@ -128,7 +128,7 @@ class FeedFragment : Fragment() {
             viewModel.onNewerPostButtonClick()
 //            println(viewModel.viewListOfPosts.value.size)
 //            adapter.submitList(viewModel.viewListOfPosts.value)
-//            binding.recyclerView.smoothScrollToPosition(0)
+            binding.recyclerView.smoothScrollToPosition(0)
 
             binding.newerPost.visibility = View.GONE
         }
