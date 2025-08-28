@@ -9,8 +9,11 @@ import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("UPDATE PostEntity SET isShown = 0")
+    suspend fun setShownAll()
 
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     suspend fun getAllAsync(): List<PostEntity>

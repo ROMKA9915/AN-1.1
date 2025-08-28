@@ -16,13 +16,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Delay
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -99,25 +95,20 @@ class FeedFragment : Fragment() {
 
         binding.list.adapter = adapter
 
-        lifecycleScope.launch {
-            val initialPosts = viewModel.loadAllPosts()
-            adapter.submitList(initialPosts)
-        }
-
         viewModel.data.onEach { data ->
-            // adapter.submitList(data.posts)   // Вызывать функцию при нажатии на кнопку к новым постам
+            adapter.submitList(data.posts)
             binding.emptyText.isVisible = data.empty
         }.launchIn(lifecycleScope)
 
-        viewModel.newerCount.onEach {
-            if (it > 0) {
-                binding.newerPost.visibility = View.VISIBLE
-            } else {
-                binding.newerPost.visibility = View.GONE
+        lifecycleScope.launch {
+            viewModel.hasNewPosts.collect {
+                if (it) {
+                    binding.newerPost.visibility = View.VISIBLE
+                } else {
+                    binding.newerPost.visibility = View.GONE
+                }
             }
-
-            println(it) // Проверять кол-во новых постов. Если > 0 то показывать кнопку к новым постам, иначе скрывать кнопку
-        }.launchIn(lifecycleScope)
+        }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
@@ -133,17 +124,8 @@ class FeedFragment : Fragment() {
 
         binding.recyclerView.setLayoutManager(LinearLayoutManager(requireContext()))
 
-        viewModel.viewListOfPosts.onEach {
-            adapter.submitList(it)
-            lifecycleScope.launch {
-                delay(3000)
-                binding.recyclerView.smoothScrollToPosition(0)
-            }
-        }.launchIn(lifecycleScope)
-
-
         binding.newerPost.setOnClickListener {
-            viewModel.loadViewListOfPosts()
+            viewModel.onNewerPostButtonClick()
 //            println(viewModel.viewListOfPosts.value.size)
 //            adapter.submitList(viewModel.viewListOfPosts.value)
 //            binding.recyclerView.smoothScrollToPosition(0)

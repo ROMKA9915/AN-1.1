@@ -7,10 +7,9 @@ import ru.netology.nmedia.entity.PostEntity
 interface PostRepository {
     val data: Flow<List<Post>>
     fun getNewer(id: Long): Flow<Int>
-    suspend fun fetchAll()
-    suspend fun getAll(): List<Post>
-    suspend fun getAllAsync(): List<Post>
+    suspend fun getAll()
     suspend fun save(post: Post)
     suspend fun removeById(id: Long)
     suspend fun likeById(id: Long)
+    suspend fun markAllShown()
 }

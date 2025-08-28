@@ -5,12 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -27,19 +22,11 @@ private val empty = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
     private val repository: PostRepository = PostRepositoryImpl(
         AppDb.getInstance(application).postDao
     )
-    val data = repository.data.map { FeedModel(it, it.isEmpty()) }
-        .catch { it.printStackTrace() }
+    val data = repository.data.map { FeedModel(it, it.isEmpty()) }.catch { it.printStackTrace() }
 
-    val viewListOfPosts = repository.data
-
-    val newerCount = viewListOfPosts.flatMapLatest {
-        repository.getNewer(it.firstOrNull()?.id ?: 0)
-            .catch { _state.postValue(FeedModelState(error = true)) }
-    }
     private val _state = MutableLiveData(FeedModelState())
     val state: LiveData<FeedModelState>
         get() = _state
@@ -47,22 +34,22 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
+    val hasNewPosts = repository.data.flatMapLatest {
+        repository.getNewer(it.firstOrNull()?.id ?: 0)
+            .catch { _state.postValue(FeedModelState(error = true)) }
+    }.map {
+        it > 0
+    }
 
     init {
         loadPosts()
-    }
-
-    fun loadViewListOfPosts() {
-        viewModelScope.launch {
-            repository.fetchAll()
-        }
     }
 
     fun loadPosts() {
         _state.value = FeedModelState(loading = true)
         viewModelScope.launch {
             try {
-                repository.fetchAll()
+                repository.getAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)
@@ -70,10 +57,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun loadAllPosts(): List<Post> {
-        return repository.getAll()
+    fun onNewerPostButtonClick() {
+        viewModelScope.launch {
+            repository.markAllShown()
+        }
     }
-
 
     fun save() {
         viewModelScope.launch {
@@ -123,7 +111,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _state.value = FeedModelState(refreshing = true)
         viewModelScope.launch {
             try {
-                repository.fetchAll()
+                repository.getAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)
