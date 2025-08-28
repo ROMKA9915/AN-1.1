@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -128,8 +129,10 @@ class FeedFragment : Fragment() {
             viewModel.onNewerPostButtonClick()
 //            println(viewModel.viewListOfPosts.value.size)
 //            adapter.submitList(viewModel.viewListOfPosts.value)
-            binding.recyclerView.smoothScrollToPosition(0)
-
+            lifecycleScope.launch {
+                delay(2000)
+                binding.list.smoothScrollToPosition(0)
+            }
             binding.newerPost.visibility = View.GONE
         }
 
