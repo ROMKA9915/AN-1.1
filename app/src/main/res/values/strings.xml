@@ -33,4 +33,10 @@
     <string name="show_new_posts">Show</string>
     <string name="retry">Retry</string>
     <string name="new_posts">New posts</string>
+    <string name="description_select_photo">Select photo</string>
+    <string name="description_take_photo">Take photo</string>
+    <string name="description_photo">Photo</string>
+    <string name="remove">Remove</string>
+    <string name="menu_save">Save</string>
+    <string name="google_play_unavailable">Google Api Unavailable</string>
 </resources>

@@ -34,4 +34,10 @@
     <string name="show_new_posts">Показать</string>
     <string name="retry">Повторить</string>
     <string name="new_posts">Новые записи</string>
+    <string name="description_select_photo">Выбрать фото</string>
+    <string name="description_take_photo">Сделать фото</string>
+    <string name="description_photo">Фото</string>
+    <string name="remove">Удалить</string>
+    <string name="menu_save">Сохранить</string>
+    <string name="google_play_unavailable">Google Api Недоступно</string>
 </resources>

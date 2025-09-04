@@ -123,8 +123,6 @@ class FeedFragment : Fragment() {
             binding.swipeRefresh.isRefreshing = state.refreshing
         }
 
-        binding.recyclerView.setLayoutManager(LinearLayoutManager(requireContext()))
-
         binding.newerPost.setOnClickListener {
             viewModel.onNewerPostButtonClick()
 //            println(viewModel.viewListOfPosts.value.size)

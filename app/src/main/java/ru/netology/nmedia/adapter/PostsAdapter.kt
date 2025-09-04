@@ -17,6 +17,7 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.activity.scaleNumbers
 import androidx.core.net.toUri
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.enumeration.AttachmentType
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -107,10 +108,11 @@ class PostViewHolder(
             .into(binding.avatar)
 
 
-        if (post.attachment != null && post.attachment.type == "IMAGE") {
+
+        if (post.attachment != null && post.attachment.type == AttachmentType.IMAGE) {
             binding.attachmentImageView.visibility = View.VISIBLE
 
-            val imageUrl = "http://10.0.2.2:9999/images/${post.attachment.url}"
+            val imageUrl = "http://10.0.2.2:9999/media/${post.attachment.url}"
             Glide.with(binding.attachmentImageView)
                 .load(imageUrl)
                 .placeholder(R.drawable.gray_background)
