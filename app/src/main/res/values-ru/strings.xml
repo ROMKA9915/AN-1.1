@@ -40,4 +40,6 @@
     <string name="remove">Удалить</string>
     <string name="menu_save">Сохранить</string>
     <string name="google_play_unavailable">Google Api Недоступно</string>
+    <string name="fullscreen_image">Полный экран изображения</string>
+    <string name="close_fullscreen">Закрыть полный экран</string>
 </resources>

@@ -92,6 +92,13 @@ class FeedFragment : Fragment() {
                     Bundle().apply { textArg = post.id.toString() })
             }
 
+            override fun onImageFullscreen(post: Post, url: String) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_fullscreenImageFragment,
+                    Bundle().apply { textArg = url }
+                )
+            }
+
         })
 
         binding.list.adapter = adapter

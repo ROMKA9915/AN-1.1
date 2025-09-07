@@ -2,6 +2,7 @@ package ru.netology.nmedia.adapter
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,8 +17,11 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.activity.scaleNumbers
 import androidx.core.net.toUri
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.enumeration.AttachmentType
+import androidx.navigation.fragment.findNavController
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -26,6 +30,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post)
     fun onVideo(post: Post)
     fun onSinglePost(post: Post)
+    fun onImageFullscreen(post: Post, url : String)
 }
 
 class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
@@ -96,6 +101,11 @@ class PostViewHolder(
                     }
                 }
             }.show()
+        }
+
+        binding.attachmentImageView.setOnClickListener {
+            val imageUrl = "http://10.0.2.2:9999/media/${post.attachment?.url}"
+            onInteractionListener.onImageFullscreen(post, imageUrl)
         }
 
         val avatarUrl = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"

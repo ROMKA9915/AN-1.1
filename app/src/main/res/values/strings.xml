@@ -39,4 +39,6 @@
     <string name="remove">Remove</string>
     <string name="menu_save">Save</string>
     <string name="google_play_unavailable">Google Api Unavailable</string>
+    <string name="fullscreen_image">Fullscreen image</string>
+    <string name="close_fullscreen">Close fullscreen</string>
 </resources>
