@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import okhttp3.Interceptor
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,8 +9,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.User
 
 
 private const val BASE_URL = "http://10.0.2.2:9999/api/slow/"
@@ -20,8 +23,17 @@ private val logging = HttpLoggingInterceptor().apply {
     }
 }
 
+private val headerInterceptor = Interceptor {
+    val originalRequest = it.request()
+    val newRequest = originalRequest.newBuilder()
+        .addHeader("Authorization", AppAuth.getInstance().authStateFlow.value.token.orEmpty())
+        .build()
+    it.proceed(newRequest)
+}
+
 private val okhttp = OkHttpClient.Builder()
     .addInterceptor(logging)
+    .addInterceptor(headerInterceptor)
     .build()
 
 private val retrofit = Retrofit.Builder()
@@ -58,6 +70,13 @@ interface PostsApiService {
     @Multipart
     @POST("media")
     suspend fun upload(@Part media: MultipartBody.Part): Response<Media>
+
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun updateUser(
+        @Field("login") login: String,
+        @Field("pass") pass: String
+    ): Response<User>
 }
 
 object PostsApi {

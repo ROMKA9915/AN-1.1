@@ -1,0 +1,40 @@
+package ru.netology.nmedia.activity
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.databinding.FragmentSignInBinding
+import ru.netology.nmedia.viewmodel.PostViewModel
+
+class SignInFragment : Fragment() {
+
+    val viewModel: PostViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val binding = FragmentSignInBinding.inflate(layoutInflater)
+
+        binding.login.setOnClickListener {
+            viewModel.signIn(
+                login = binding.nameUser.text.toString(),
+                pass = binding.passwordUser.text.toString()
+            ) {
+                findNavController().navigateUp()
+            }
+        }
+
+        binding.cancel.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        return binding.root
+    }
+
+}

@@ -42,4 +42,14 @@
     <string name="google_play_unavailable">Google Api Недоступно</string>
     <string name="fullscreen_image">Полный экран изображения</string>
     <string name="close_fullscreen">Закрыть полный экран</string>
+    <string name="sign_in">Вход</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="sign_out">Выход</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="sign_out_confirmation">Вы уверены?</string>
+    <string name="user_name">Ваше имя</string>
+    <string name="user_password">Пароль</string>
+    <string name="login">Войти</string>
+    <string name="cancel">Отмена</string>
 </resources>

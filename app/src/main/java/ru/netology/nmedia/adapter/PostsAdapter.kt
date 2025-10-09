@@ -3,6 +3,7 @@ package ru.netology.nmedia.adapter
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.security.keystore.UserNotAuthenticatedException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,11 +18,13 @@ import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.activity.scaleNumbers
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.enumeration.AttachmentType
 import androidx.navigation.fragment.findNavController
+import kotlin.Boolean
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -33,12 +36,15 @@ interface OnInteractionListener {
     fun onImageFullscreen(post: Post, url : String)
 }
 
-class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
+class PostsAdapter(
+    private val onInteractionListener: OnInteractionListener,
+    private val userId: Long,
+) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(view, onInteractionListener)
+        return PostViewHolder(view, onInteractionListener, userId)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -48,7 +54,8 @@ class PostsAdapter(private val onInteractionListener: OnInteractionListener) :
 
 class PostViewHolder(
     private val binding: CardPostBinding,
-    private val onInteractionListener: OnInteractionListener
+    private val onInteractionListener: OnInteractionListener,
+    private val userId: Long,
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(post: Post) = with(binding) {
@@ -82,6 +89,8 @@ class PostViewHolder(
             onInteractionListener.onSinglePost(post)
         }
 
+        menu.isVisible = post.authorId == userId
+
         menu.setOnClickListener {
             PopupMenu(it.context, it).apply {
                 inflate(R.menu.post_actions)
@@ -114,7 +123,7 @@ class PostViewHolder(
             .placeholder(R.drawable.ic_avatar_placeholder)
             .circleCrop()
             .override(100, 100)
-            .timeout(5_000)
+            .timeout(6_000)
             .into(binding.avatar)
 
 

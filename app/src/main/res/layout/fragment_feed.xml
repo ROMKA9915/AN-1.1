@@ -13,17 +13,25 @@
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/blue"
         android:clickable="true"
-        android:text="@string/new_posts"
-        android:textColor="@color/white"
-        app:iconTint="@color/white"
-        app:icon="@drawable/ic_play_arrow_24"
         android:contentDescription="@string/description_post_save"
         android:focusable="true"
-        android:visibility="gone" />
+        android:text="@string/new_posts"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:icon="@drawable/ic_play_arrow_24"
+        app:iconTint="@color/white" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/feedToolBar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/menu_main"/>
 
         <TextView
             android:id="@+id/emptyText"
@@ -51,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/feedToolBar">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list"

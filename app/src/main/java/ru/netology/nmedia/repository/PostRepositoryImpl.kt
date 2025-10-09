@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
@@ -82,7 +83,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun save(post: Post) {
         try {
-            PostsApi.service.save(post)
+            val postFinal = post.copy(
+                authorId = AppAuth.getInstance().authStateFlow.value.id,
+            )
+            PostsApi.service.save(postFinal)
         } catch (e: Exception) {
             throw Exception("Save operation failed", e)
         }
@@ -92,7 +96,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         try {
             val media = upload(upload)
             // TODO: add support for other types
-            val postWithAttachment = post.copy(attachment = Attachment(media.id, AttachmentType.IMAGE))
+            val postWithAttachment = post.copy(
+                attachment = Attachment(media.id, AttachmentType.IMAGE),
+                authorId = AppAuth.getInstance().authStateFlow.value.id,
+            )
             save(postWithAttachment)
         } catch (e: AppError) {
             throw e
@@ -115,6 +122,17 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             return response.body() ?: throw ApiError(response.code(), response.message())
         } catch (e: IOException) {
             throw NetworkError
+        }
+    }
+
+    override suspend fun signInUser(login: String, pass: String) {
+        try {
+            val updatedUser = PostsApi.service.updateUser(login, pass).body()
+            if (updatedUser != null) {
+                AppAuth.getInstance().setAuth(updatedUser.id, updatedUser.token)
+            }
+        } catch (e: Exception) {
+            throw Exception("Incorrect login or password", e)
         }
     }
 }

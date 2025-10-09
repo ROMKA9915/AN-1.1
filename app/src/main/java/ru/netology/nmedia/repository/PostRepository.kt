@@ -16,4 +16,5 @@ interface PostRepository {
     suspend fun likeById(id: Long)
     suspend fun markAllShown()
     suspend fun upload(upload: MediaUpload): Media
+    suspend fun signInUser(login: String, pass: String)
 }

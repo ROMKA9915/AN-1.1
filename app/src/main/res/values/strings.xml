@@ -41,4 +41,14 @@
     <string name="google_play_unavailable">Google Api Unavailable</string>
     <string name="fullscreen_image">Fullscreen image</string>
     <string name="close_fullscreen">Close fullscreen</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="sign_out_confirmation">Are you sure?</string>
+    <string name="user_name">Your name</string>
+    <string name="user_password">Password</string>
+    <string name="login">Login</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -1,12 +1,17 @@
 package ru.netology.nmedia.activity
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -24,6 +29,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -55,7 +61,10 @@ class FeedFragment : Fragment() {
             insets
         }
 
-        adapter = PostsAdapter(object : OnInteractionListener {
+        setMenu()
+
+
+        val listener = object : OnInteractionListener {
             override fun onLike(post: Post) {
                 viewModel.likeById(post.id)
             }
@@ -99,9 +108,13 @@ class FeedFragment : Fragment() {
                 )
             }
 
-        })
-
-        binding.list.adapter = adapter
+        }
+        AppAuth.getInstance().authStateFlow.onEach {
+            adapter = PostsAdapter(listener, it.id)
+            binding.list.post {
+                binding.list.adapter = adapter
+            }
+        }.launchIn(lifecycleScope)
 
         viewModel.data.onEach { data ->
             adapter.submitList(data.posts)
@@ -150,6 +163,39 @@ class FeedFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun setMenu() {
+        val menu = binding.feedToolBar.menu
+        viewModel.isAuthenticated.onEach {
+            menu.setGroupVisible(R.id.unauthenticated, !it)
+            menu.setGroupVisible(R.id.authenticated, it)
+        }.launchIn(lifecycleScope)
+
+        menu.findItem(R.id.signout).setOnMenuItemClickListener {
+            val dialog = AlertDialog.Builder(requireActivity())
+                .setPositiveButton(R.string.yes) { dialog, _ ->
+                    AppAuth.getInstance().removeAuth()
+                }
+                .setNegativeButton(R.string.no) { _, _ -> }
+                .setTitle(R.string.sign_out_confirmation)
+                .create()
+
+            dialog.show()
+            true
+        }
+
+        menu.findItem(R.id.signin).setOnMenuItemClickListener {
+            findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+
+            true
+        }
+
+        menu.findItem(R.id.signup).setOnMenuItemClickListener {
+            //TODO Добавить навигацию на экран регистрации
+
+            true
+        }
     }
 }
 
