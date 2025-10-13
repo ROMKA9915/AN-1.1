@@ -26,7 +26,7 @@ private val logging = HttpLoggingInterceptor().apply {
 private val headerInterceptor = Interceptor {
     val originalRequest = it.request()
     val newRequest = originalRequest.newBuilder()
-        .addHeader("Authorization", AppAuth.getInstance().authStateFlow.value.token.orEmpty())
+//        .addHeader("Authorization", AppAuth.getInstance().authStateFlow.value.token.orEmpty())
         .build()
     it.proceed(newRequest)
 }
@@ -73,10 +73,7 @@ interface PostsApiService {
 
     @FormUrlEncoded
     @POST("users/authentication")
-    suspend fun updateUser(
-        @Field("login") login: String,
-        @Field("pass") pass: String
-    ): Response<User>
+    suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<User>
 }
 
 object PostsApi {

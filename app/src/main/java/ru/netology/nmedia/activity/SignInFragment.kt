@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignInBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 
@@ -24,10 +26,13 @@ class SignInFragment : Fragment() {
         binding.login.setOnClickListener {
             viewModel.signIn(
                 login = binding.nameUser.text.toString(),
-                pass = binding.passwordUser.text.toString()
-            ) {
-                findNavController().navigateUp()
-            }
+                pass = binding.passwordUser.text.toString(),
+                onSuccess = { findNavController().navigateUp() },
+                onFailure = {
+                    Snackbar.make(binding.root, R.string.error_login, Snackbar.LENGTH_LONG)
+                        .show()
+                }
+            )
         }
 
         binding.cancel.setOnClickListener {

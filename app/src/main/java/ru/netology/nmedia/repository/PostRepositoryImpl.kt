@@ -126,13 +126,11 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun signInUser(login: String, pass: String) {
-        try {
-            val updatedUser = PostsApi.service.updateUser(login, pass).body()
-            if (updatedUser != null) {
-                AppAuth.getInstance().setAuth(updatedUser.id, updatedUser.token)
-            }
-        } catch (e: Exception) {
-            throw Exception("Incorrect login or password", e)
+        val updatedUser = PostsApi.service.updateUser(login, pass).body()
+        if (updatedUser != null) {
+            AppAuth.getInstance().setAuth(updatedUser.id, updatedUser.token)
+        } else {
+            throw Exception("Incorrect login or password")
         }
     }
 }

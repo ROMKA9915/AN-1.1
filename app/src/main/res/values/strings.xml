@@ -51,4 +51,6 @@
     <string name="user_password">Password</string>
     <string name="login">Login</string>
     <string name="cancel">Cancel</string>
+    <string name="error_login">Incorrect login or password</string>
+    <string name="ok">Ok</string>
 </resources>

@@ -155,13 +155,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun signIn(login: String, pass: String, onSuccess: () -> Unit) {
+    fun signIn(login: String, pass: String, onSuccess: () -> Unit, onFailure: () -> Unit) {
         viewModelScope.launch {
             try {
                 repository.signInUser(login, pass)
                 onSuccess()
             } catch (e: Exception) {
-                _state.value = FeedModelState(error = true)
+                onFailure()
             }
         }
     }
