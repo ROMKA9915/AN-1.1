@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Attachment
@@ -22,16 +22,20 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import java.io.IOException
+import javax.inject.Inject
 import kotlin.collections.map
 
 
-class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+    private val apiService: PostsApiService,
+) : PostRepository {
 
     override val data = dao.getAll().map { it.map { it.toDto() } }
 
     override suspend fun getAll() {
         try {
-            val response = PostsApi.service.getAll()
+            val response = apiService.getAll()
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -47,7 +51,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun removeById(id: Long) {
         try {
             dao.removeById(id)
-            PostsApi.service.deleteById(id)
+            apiService.deleteById(id)
         } catch (e: Exception) {
             throw Exception("Remove operation failed", e)
         }
@@ -55,7 +59,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun likeById(id: Long) {
         try {
-            PostsApi.service.likeById(id)
+            apiService.likeById(id)
         } catch (e: Exception) {
             throw Exception("Like operation failed", e)
         }
@@ -67,7 +71,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override fun getNewer(id: Long): Flow<Int> = flow {
         while (true) {
-            val response = PostsApi.service.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -77,16 +81,14 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             emit(body.size)
             delay(10_000)
         }
-    }
-        .catch { e -> throw AppError.from(e) }
-        .flowOn(Dispatchers.IO)
+    }.catch { e -> throw AppError.from(e) }.flowOn(Dispatchers.IO)
 
     override suspend fun save(post: Post) {
         try {
             val postFinal = post.copy(
                 authorId = AppAuth.getInstance().authStateFlow.value.id,
             )
-            PostsApi.service.save(postFinal)
+            apiService.save(postFinal)
         } catch (e: Exception) {
             throw Exception("Save operation failed", e)
         }
@@ -114,7 +116,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 "file", upload.file.name, upload.file.asRequestBody()
             )
 
-            val response = PostsApi.service.upload(media)
+            val response = apiService.upload(media)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -126,7 +128,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun signInUser(login: String, pass: String) {
-        val updatedUser = PostsApi.service.updateUser(login, pass).body()
+        val updatedUser = apiService.updateUser(login, pass).body()
         if (updatedUser != null) {
             AppAuth.getInstance().setAuth(updatedUser.id, updatedUser.token)
         } else {

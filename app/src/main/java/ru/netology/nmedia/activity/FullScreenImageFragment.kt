@@ -9,10 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FullscreenImageViewBinding
 import ru.netology.nmedia.utils.StringArg
 
+@AndroidEntryPoint
 class FullScreenImageFragment : Fragment() {
 
     lateinit var binding: FullscreenImageViewBinding

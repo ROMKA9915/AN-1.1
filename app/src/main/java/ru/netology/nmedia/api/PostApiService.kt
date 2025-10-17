@@ -1,5 +1,8 @@
 package ru.netology.nmedia.api
 
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -13,6 +16,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.User
+import javax.inject.Singleton
 
 
 private const val BASE_URL = "http://10.0.2.2:9999/api/slow/"
@@ -41,6 +45,7 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
     .client(okhttp)
     .build()
+
 
 interface PostsApiService {
     @GET("posts")
@@ -74,10 +79,4 @@ interface PostsApiService {
     @FormUrlEncoded
     @POST("users/authentication")
     suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<User>
-}
-
-object PostsApi {
-    val service: PostsApiService by lazy {
-        retrofit.create(PostsApiService::class.java)
-    }
 }

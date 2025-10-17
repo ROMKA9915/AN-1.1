@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
     id 'com.google.gms.google-services'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -45,8 +46,8 @@ android {
 
 dependencies {
     def core_version = "1.16.0"
-    def appcompat_version = "1.7.0"
-    def mdc_version = "1.12.0"
+    def appcompat_version = "1.7.1"
+    def mdc_version = "1.13.0"
     def constraintlayout_version = "2.2.1"
     def recyclerview_version = "1.4.0"
     def junit_version = "4.13.2"
@@ -55,7 +56,7 @@ dependencies {
     def activity_version = "1.10.1"
     def lifecycle_version = "2.9.0"
     def gson_version = "2.13.1"
-    def nav_version = "2.9.0"
+    def nav_version = "2.9.5"
     def room_version = "2.7.1"
     def okhttp_version = "4.12.0"
     def glide_version = "4.16.0"
@@ -90,6 +91,8 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation "com.github.dhaval2404:imagepicker:$imagepicker_version"
     implementation "com.google.android.gms:play-services-base:$play_services_base_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
