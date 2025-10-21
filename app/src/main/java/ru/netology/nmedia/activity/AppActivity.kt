@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.api.GoogleApiActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
@@ -33,6 +34,8 @@ class AppActivity : AppCompatActivity() {
     lateinit var auth: AppAuth
     @Inject
     lateinit var firebase : FirebaseMessaging
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
 
     private val viewModel: AuthViewModel by viewModels()
 
@@ -138,7 +141,7 @@ class AppActivity : AppCompatActivity() {
     }
 
     private fun checkGoogleApiAvailability() {
-        with(GoogleApiAvailability.getInstance()) {
+        with(googleApiAvailability) {
             val code = isGooglePlayServicesAvailable(this@AppActivity)
             if (code == ConnectionResult.SUCCESS) {
                 return@with

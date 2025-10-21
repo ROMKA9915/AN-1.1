@@ -18,7 +18,7 @@ import javax.inject.Singleton
 class ApiModule {
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999/api/slow//api/slow/"
+        private const val BASE_URL = "http://10.0.2.2:9999/api/slow/"
     }
 
     @Provides
