@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.enumeration.AttachmentType
 import androidx.navigation.fragment.findNavController
+import androidx.paging.PagingDataAdapter
 import kotlin.Boolean
 
 interface OnInteractionListener {
@@ -40,7 +41,7 @@ class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
     private val userId: Long,
 ) :
-    ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
+    PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -48,7 +49,8 @@ class PostsAdapter(
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val post = getItem(position) ?: return
+        holder.bind(post)
     }
 }
 

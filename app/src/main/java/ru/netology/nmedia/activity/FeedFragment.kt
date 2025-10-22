@@ -15,9 +15,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -113,10 +115,19 @@ class FeedFragment : Fragment() {
             }
         }.launchIn(lifecycleScope)
 
-        viewModel.data.onEach { data ->
-            adapter.submitList(data.posts)
-            binding.emptyText.isVisible = data.empty
-        }.launchIn(lifecycleScope)
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                adapter.submitData(it)
+            }
+        }
+
+        lifecycleScope.launchWhenCreated {
+            adapter.loadStateFlow.collectLatest {
+                binding.swipeRefresh.isRefreshing = it.refresh is LoadState.Loading
+                            || it.append is LoadState.Loading
+                            || it.prepend is LoadState.Loading
+            }
+        }
 
         lifecycleScope.launch {
             viewModel.hasNewPosts.collect {
@@ -152,7 +163,7 @@ class FeedFragment : Fragment() {
         }
 
         binding.swipeRefresh.setOnRefreshListener {
-            viewModel.refresh()
+            adapter.refresh()
         }
 
         binding.fab.setOnClickListener {
@@ -184,12 +195,12 @@ class FeedFragment : Fragment() {
 
         menu.findItem(R.id.signin).setOnMenuItemClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
-
             true
         }
 
         menu.findItem(R.id.signup).setOnMenuItemClickListener {
-            //TODO Добавить навигацию на экран регистрации
+                adapter.refresh()
+
 
             true
         }

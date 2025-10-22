@@ -6,11 +6,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -45,7 +52,13 @@ class PostViewModel @Inject constructor(
         AppDb.getInstance(application).postDao(),
         apiService
     )
-    val data = repository.data.map { FeedModel(it, it.isEmpty()) }.catch { it.printStackTrace() }
+    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
+        .flatMapLatest { (myId, _) ->
+            repository.data
+                .map { posts ->
+                    posts.map { it.copy(ownedByMe = it.authorId == myId) }
+                }
+        }.flowOn(Dispatchers.Default)
 
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
@@ -63,11 +76,18 @@ class PostViewModel @Inject constructor(
     val photo: LiveData<PhotoModel>
         get() = _photo
     val hasNewPosts = repository.data.flatMapLatest {
-        repository.getNewer(it.firstOrNull()?.id ?: 0)
+        repository.getNewer(0)
             .catch { _state.postValue(FeedModelState(error = true)) }
     }.map {
         it > 0
     }
+
+//        repository.data.flatMapLatest {
+//        repository.getNewer(it.firstOrNull()?.id ?: 0)
+//            .catch { _state.postValue(FeedModelState(error = true)) }
+//    }.map {
+//        it > 0
+//    }
 
     val isAuthenticated = AppAuth.getInstance().authStateFlow.map {
         it.id != 0L && it.token.isNullOrBlank().not()

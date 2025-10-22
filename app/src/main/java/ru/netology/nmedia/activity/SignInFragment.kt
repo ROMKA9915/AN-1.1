@@ -6,10 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
+import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentSignInBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 
@@ -17,6 +21,8 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class SignInFragment : Fragment() {
 
     val viewModel: PostViewModel by activityViewModels()
+
+    lateinit var adapter: PostsAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,6 +41,8 @@ class SignInFragment : Fragment() {
                         .show()
                 }
             )
+
+            adapter.refresh()
         }
 
         binding.cancel.setOnClickListener {
