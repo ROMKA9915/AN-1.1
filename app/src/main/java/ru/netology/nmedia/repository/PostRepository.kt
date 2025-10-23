@@ -9,8 +9,8 @@ import ru.netology.nmedia.entity.PostEntity
 
 interface PostRepository {
     val data: Flow<PagingData<Post>>
-    fun getNewer(id: Long): Flow<Int>
-    suspend fun getAll()
+//    fun getNewer(id: Long): Flow<Int>
+//    suspend fun getAll()
     suspend fun save(post: Post)
     suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
     suspend fun removeById(id: Long)

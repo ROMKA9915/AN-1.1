@@ -75,12 +75,12 @@ class PostViewModel @Inject constructor(
     private val _photo = MutableLiveData(noPhoto)
     val photo: LiveData<PhotoModel>
         get() = _photo
-    val hasNewPosts = repository.data.flatMapLatest {
-        repository.getNewer(0)
-            .catch { _state.postValue(FeedModelState(error = true)) }
-    }.map {
-        it > 0
-    }
+//    val hasNewPosts = repository.data.flatMapLatest {
+//        repository.getNewer(0)
+//            .catch { _state.postValue(FeedModelState(error = true)) }
+//    }.map {
+//        it > 0
+//    }
 
 //        repository.data.flatMapLatest {
 //        repository.getNewer(it.firstOrNull()?.id ?: 0)
@@ -101,7 +101,7 @@ class PostViewModel @Inject constructor(
         _state.value = FeedModelState(loading = true)
         viewModelScope.launch {
             try {
-                repository.getAll()
+//                repository.getAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)
@@ -178,7 +178,7 @@ class PostViewModel @Inject constructor(
         _state.value = FeedModelState(refreshing = true)
         viewModelScope.launch {
             try {
-                repository.getAll()
+//                repository.getAll()
                 _state.value = FeedModelState()
             } catch (_: Exception) {
                 _state.value = FeedModelState(error = true)

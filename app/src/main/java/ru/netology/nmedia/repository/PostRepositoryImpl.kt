@@ -42,20 +42,20 @@ class PostRepositoryImpl @Inject constructor(
         }
     ).flow
 
-    override suspend fun getAll() {
-        try {
-            val response = apiService.getAll()
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(body.fromDtoToEntity())
-            dao.setShownAll()
-        } catch (e: Exception) {
-            throw NetworkError
-        }
-    }
+//    override suspend fun getAll() {
+//        try {
+//            val response = apiService.getAll()
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            dao.insert(body.fromDtoToEntity())
+//            dao.setShownAll()
+//        } catch (e: Exception) {
+//            throw NetworkError
+//        }
+//    }
 
     override suspend fun removeById(id: Long) {
         try {
@@ -78,19 +78,19 @@ class PostRepositoryImpl @Inject constructor(
         dao.setShownAll()
     }
 
-    override fun getNewer(id: Long): Flow<Int> = flow {
-        while (true) {
-            val response = apiService.getNewer(id)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            dao.insert(body.fromDtoToEntity())
-            emit(body.size)
-            delay(10_000)
-        }
-    }.catch { e -> throw AppError.from(e) }.flowOn(Dispatchers.IO)
+//    override fun getNewer(id: Long): Flow<Int> = flow {
+//        while (true) {
+//            val response = apiService.getNewer(id)
+//            if (!response.isSuccessful) {
+//                throw ApiError(response.code(), response.message())
+//            }
+//
+//            val body = response.body() ?: throw ApiError(response.code(), response.message())
+//            dao.insert(body.fromDtoToEntity())
+//            emit(body.size)
+//            delay(10_000)
+//        }
+//    }.catch { e -> throw AppError.from(e) }.flowOn(Dispatchers.IO)
 
     override suspend fun save(post: Post) {
         try {

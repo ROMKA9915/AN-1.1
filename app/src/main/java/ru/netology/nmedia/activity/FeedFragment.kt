@@ -129,15 +129,15 @@ class FeedFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.hasNewPosts.collect {
-                if (it) {
-                    binding.newerPost.visibility = View.VISIBLE
-                } else {
-                    binding.newerPost.visibility = View.GONE
-                }
-            }
-        }
+//        lifecycleScope.launch {
+//            viewModel.hasNewPosts.collect {
+//                if (it) {
+//                    binding.newerPost.visibility = View.VISIBLE
+//                } else {
+//                    binding.newerPost.visibility = View.GONE
+//                }
+//            }
+//        }
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
@@ -184,12 +184,14 @@ class FeedFragment : Fragment() {
             val dialog = AlertDialog.Builder(requireActivity())
                 .setPositiveButton(R.string.yes) { dialog, _ ->
                     AppAuth.getInstance().removeAuth()
+                    adapter.refresh()
                 }
                 .setNegativeButton(R.string.no) { _, _ -> }
                 .setTitle(R.string.sign_out_confirmation)
                 .create()
 
             dialog.show()
+
             true
         }
 
@@ -199,8 +201,6 @@ class FeedFragment : Fragment() {
         }
 
         menu.findItem(R.id.signup).setOnMenuItemClickListener {
-                adapter.refresh()
-
 
             true
         }

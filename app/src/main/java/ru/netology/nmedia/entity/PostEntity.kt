@@ -22,6 +22,7 @@ data class PostEntity(
     val views: Long = 0,
     val video: String? = null,
     val isShown: Boolean = false,
+    val ownedByMe: Boolean = false,
     @Embedded
     var attachment: AttachmentEmbeddable?,
 ) {
@@ -38,7 +39,8 @@ data class PostEntity(
         views = views,
         video = video,
         isShown = isShown,
-        attachment = attachment?.toDto()
+        ownedByMe = ownedByMe,
+        attachment = attachment?.toDto(),
     )
 
     companion object {
@@ -55,7 +57,8 @@ data class PostEntity(
             dto.views,
             dto.video,
             dto.isShown,
-            AttachmentEmbeddable.fromDto(dto.attachment)
+            dto.ownedByMe,
+            AttachmentEmbeddable.fromDto(dto.attachment),
         )
     }
 

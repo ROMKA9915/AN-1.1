@@ -35,14 +35,15 @@ class SignInFragment : Fragment() {
             viewModel.signIn(
                 login = binding.nameUser.text.toString(),
                 pass = binding.passwordUser.text.toString(),
-                onSuccess = { findNavController().navigateUp() },
+                onSuccess = {
+                    findNavController().navigateUp()
+                    adapter.refresh()
+                },
                 onFailure = {
                     Snackbar.make(binding.root, R.string.error_login, Snackbar.LENGTH_LONG)
                         .show()
                 }
             )
-
-            adapter.refresh()
         }
 
         binding.cancel.setOnClickListener {
@@ -51,5 +52,4 @@ class SignInFragment : Fragment() {
 
         return binding.root
     }
-
 }

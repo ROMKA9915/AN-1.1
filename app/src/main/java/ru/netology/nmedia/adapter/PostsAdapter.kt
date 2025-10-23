@@ -1,6 +1,7 @@
 package ru.netology.nmedia.adapter
 
 import android.content.Intent
+import android.hardware.camera2.CaptureFailure
 import android.net.Uri
 import android.os.Bundle
 import android.security.keystore.UserNotAuthenticatedException
@@ -19,12 +20,14 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.activity.scaleNumbers
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.enumeration.AttachmentType
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingDataAdapter
+import kotlinx.coroutines.launch
 import kotlin.Boolean
 
 interface OnInteractionListener {
@@ -91,7 +94,7 @@ class PostViewHolder(
             onInteractionListener.onSinglePost(post)
         }
 
-        menu.isVisible = post.authorId == userId
+        menu.isVisible = post.ownedByMe
 
         menu.setOnClickListener {
             PopupMenu(it.context, it).apply {
