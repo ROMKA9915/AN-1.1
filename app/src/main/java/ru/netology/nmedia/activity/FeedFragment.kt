@@ -30,6 +30,7 @@ import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 import java.math.RoundingMode
 
@@ -41,6 +42,8 @@ class FeedFragment : Fragment() {
     lateinit var adapter: PostsAdapter
 
     val viewModel: PostViewModel by activityViewModels()
+
+    val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -108,17 +111,17 @@ class FeedFragment : Fragment() {
             }
 
         }
-        AppAuth.getInstance().authStateFlow.onEach {
-            adapter = PostsAdapter(listener, it.id)
-            binding.list.post {
-                binding.list.adapter = adapter
-            }
-        }.launchIn(lifecycleScope)
+        adapter = PostsAdapter(listener)
+        binding.list.adapter = adapter
 
         lifecycleScope.launchWhenCreated {
             viewModel.data.collectLatest {
                 adapter.submitData(it)
             }
+        }
+
+        authViewModel.data.observe(viewLifecycleOwner) {
+            adapter.refresh()
         }
 
         lifecycleScope.launchWhenCreated {

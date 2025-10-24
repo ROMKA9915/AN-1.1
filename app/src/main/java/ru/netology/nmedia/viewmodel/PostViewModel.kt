@@ -45,20 +45,22 @@ private val noPhoto = PhotoModel()
 @HiltViewModel
 class PostViewModel @Inject constructor(
     application: Application,
-    appAuth: AppAuth,
+//    appAuth: AppAuth,
     apiService: PostsApiService,
 ) : ViewModel() {
     private val repository: PostRepository = PostRepositoryImpl(
         AppDb.getInstance(application).postDao(),
         apiService
     )
-    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
-        .flatMapLatest { (myId, _) ->
-            repository.data
-                .map { posts ->
-                    posts.map { it.copy(ownedByMe = it.authorId == myId) }
-                }
-        }.flowOn(Dispatchers.Default)
+//    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
+//        .flatMapLatest { (myId, _) ->
+//            repository.data
+//                .map { posts ->
+//                    posts.map { it.copy(ownedByMe = it.authorId == myId) }
+//                }
+//        }.flowOn(Dispatchers.Default)
+
+    val data: Flow<PagingData<Post>> = repository.data
 
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
@@ -75,19 +77,6 @@ class PostViewModel @Inject constructor(
     private val _photo = MutableLiveData(noPhoto)
     val photo: LiveData<PhotoModel>
         get() = _photo
-//    val hasNewPosts = repository.data.flatMapLatest {
-//        repository.getNewer(0)
-//            .catch { _state.postValue(FeedModelState(error = true)) }
-//    }.map {
-//        it > 0
-//    }
-
-//        repository.data.flatMapLatest {
-//        repository.getNewer(it.firstOrNull()?.id ?: 0)
-//            .catch { _state.postValue(FeedModelState(error = true)) }
-//    }.map {
-//        it > 0
-//    }
 
     val isAuthenticated = AppAuth.getInstance().authStateFlow.map {
         it.id != 0L && it.token.isNullOrBlank().not()

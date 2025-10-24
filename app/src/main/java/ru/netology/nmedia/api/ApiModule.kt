@@ -33,11 +33,10 @@ class ApiModule {
     @Provides
     fun provideOkHttp(
         logging: HttpLoggingInterceptor,
-        appAuth: AppAuth
     ): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
         .addInterceptor { chain ->
-            appAuth.authStateFlow.value.token?.let { token ->
+            AppAuth.getInstance().authStateFlow.value.token?.let { token ->
                 val newRequest = chain.request().newBuilder()
                     .addHeader("Authorization", token)
                     .build()

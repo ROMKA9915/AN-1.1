@@ -22,8 +22,6 @@ class SignInFragment : Fragment() {
 
     val viewModel: PostViewModel by activityViewModels()
 
-    lateinit var adapter: PostsAdapter
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,7 +35,7 @@ class SignInFragment : Fragment() {
                 pass = binding.passwordUser.text.toString(),
                 onSuccess = {
                     findNavController().navigateUp()
-                    adapter.refresh()
+                    viewModel.refresh()
                 },
                 onFailure = {
                     Snackbar.make(binding.root, R.string.error_login, Snackbar.LENGTH_LONG)
