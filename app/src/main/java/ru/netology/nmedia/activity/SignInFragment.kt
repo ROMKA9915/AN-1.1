@@ -35,7 +35,6 @@ class SignInFragment : Fragment() {
                 pass = binding.passwordUser.text.toString(),
                 onSuccess = {
                     findNavController().navigateUp()
-                    viewModel.refresh()
                 },
                 onFailure = {
                     Snackbar.make(binding.root, R.string.error_login, Snackbar.LENGTH_LONG)

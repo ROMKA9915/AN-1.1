@@ -1,5 +1,6 @@
 package ru.netology.nmedia.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -17,6 +18,9 @@ import javax.inject.Singleton
 interface PostDao {
     @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
+    fun getPagingSource(): PagingSource<Int, PostEntity>
 
     @Query("UPDATE PostEntity SET isShown = 1")
     suspend fun setShownAll()
