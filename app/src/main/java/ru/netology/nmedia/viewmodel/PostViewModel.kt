@@ -44,14 +44,10 @@ private val noPhoto = PhotoModel()
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PostViewModel @Inject constructor(
+    private val repository: PostRepository,
     application: Application,
-//    appAuth: AppAuth,
     apiService: PostsApiService,
 ) : ViewModel() {
-    private val repository: PostRepository = PostRepositoryImpl(
-        AppDb.getInstance(application).postDao(),
-        apiService
-    )
 //    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
 //        .flatMapLatest { (myId, _) ->
 //            repository.data

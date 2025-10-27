@@ -12,6 +12,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
@@ -26,15 +28,22 @@ import javax.inject.Inject
 
 
 class PostRepositoryImpl @Inject constructor(
-    private val dao: PostDao,
+    private val postDao: PostDao,
     private val apiService: PostsApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDb,
 ) : PostRepository {
 
     @OptIn(ExperimentalPagingApi::class)
     override val data: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(pageSize = 25),
-        pagingSourceFactory = dao::getPagingSource,
-        remoteMediator = PostRemoteMediator(apiService = apiService, postDao = dao)
+        pagingSourceFactory = postDao::getPagingSource,
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            postDao = postDao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb,
+        )
     ).flow.map { it.map(PostEntity::toDto) }
 
 //    override suspend fun getAll() {
@@ -54,7 +63,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun removeById(id: Long) {
         try {
-            dao.removeById(id)
+            postDao.removeById(id)
             apiService.deleteById(id)
         } catch (e: Exception) {
             throw Exception("Remove operation failed", e)
@@ -70,7 +79,7 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun markAllShown() {
-        dao.setShownAll()
+        postDao.setShownAll()
     }
 
 //    override fun getNewer(id: Long): Flow<Int> = flow {
