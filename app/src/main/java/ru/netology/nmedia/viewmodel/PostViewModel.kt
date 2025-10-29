@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +49,8 @@ class PostViewModel @Inject constructor(
     application: Application,
     apiService: PostsApiService,
 ) : ViewModel() {
+
+
 //    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
 //        .flatMapLatest { (myId, _) ->
 //            repository.data

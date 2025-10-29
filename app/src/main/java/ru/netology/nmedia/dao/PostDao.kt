@@ -16,10 +16,10 @@ import javax.inject.Singleton
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
+    @Query("SELECT * FROM PostEntity WHERE isShown = 0 ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
-    @Query("SELECT * FROM PostEntity WHERE isShown = 1 ORDER BY id DESC")
+    @Query("SELECT * FROM PostEntity WHERE isShown = 0 ORDER BY id DESC")
     fun getPagingSource(): PagingSource<Int, PostEntity>
 
     @Query("UPDATE PostEntity SET isShown = 1")
