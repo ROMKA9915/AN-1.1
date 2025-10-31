@@ -41,8 +41,7 @@ interface PostDao {
         if (post.id == 0L) insert(post) else updateContentById(post.id, post.content)
 
     @Query("""
-        UPDATE PostEntity SET
-        likes = likes + CASE WHEN likedByMe THEN -1 ELSE 1 END,
+        UPDATE PostEntity SET likes = likes + CASE WHEN likedByMe THEN -1 ELSE 1 END,
         likedByMe = CASE WHEN likedByMe THEN 0 ELSE 1 END
         WHERE id = :id
         """)

@@ -72,6 +72,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun likeById(id: Long) {
         try {
+            postDao.likeById(id)
             apiService.likeById(id)
         } catch (e: Exception) {
             throw Exception("Like operation failed", e)

@@ -22,14 +22,23 @@ class PostRemoteMediator(
     private val appDb: AppDb,
 ) : RemoteMediator<Int, PostEntity>() {
 
+
+
     override suspend fun load(
-        loadType: LoadType,
-        state: PagingState<Int, PostEntity>
+        loadType: LoadType, state: PagingState<Int, PostEntity>
     ): MediatorResult {
+
+        val postKeyMax = postRemoteKeyDao.max()
+
         try {
             val response = when (loadType) {
                 LoadType.REFRESH -> {
-                    apiService.getLatest(state.config.pageSize)
+
+                    if (postKeyMax == null) {
+                        apiService.getLatest(state.config.pageSize)
+                    } else {
+                        apiService.getAfter(postKeyMax, state.config.pageSize)
+                    }
                 }
 
                 LoadType.PREPEND -> {
@@ -56,17 +65,19 @@ class PostRemoteMediator(
             appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        postRemoteKeyDao.insert(
-                            listOf(
-                                PostRemoteKeyEntity(
-                                    PostRemoteKeyEntity.KeyType.AFTER,
-                                    body.first().id,
-                                ),
+                        if (postKeyMax == null) {
+                            postRemoteKeyDao.insert(
                                 PostRemoteKeyEntity(
                                     PostRemoteKeyEntity.KeyType.BEFORE,
                                     body.last().id,
-                                ),
+                                )
                             )
+                        }
+                        postRemoteKeyDao.insert(
+                            PostRemoteKeyEntity(
+                                PostRemoteKeyEntity.KeyType.AFTER,
+                                body.first().id,
+                            ),
                         )
                     }
 
