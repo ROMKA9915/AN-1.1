@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -46,20 +47,25 @@ private val noPhoto = PhotoModel()
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val repository: PostRepository,
-    application: Application,
-    apiService: PostsApiService,
+    auth: AppAuth,
 ) : ViewModel() {
+    private val cashed = repository
+        .data
+        .cachedIn(viewModelScope)
 
+    val data: Flow<PagingData<FeedItem>> = auth.authStateFlow
+        .flatMapLatest { (myId, _) ->
+            cashed.map { pagingData ->
+                pagingData.map { post ->
+                    if (post is Post) {
+                        post.copy(ownedByMe = post.authorId == myId)
+                    } else {
+                        post
+                    }
+                }
+            }
+        }
 
-//    val data : Flow<PagingData<Post>> = appAuth.authStateFlow
-//        .flatMapLatest { (myId, _) ->
-//            repository.data
-//                .map { posts ->
-//                    posts.map { it.copy(ownedByMe = it.authorId == myId) }
-//                }
-//        }.flowOn(Dispatchers.Default)
-
-    val data: Flow<PagingData<Post>> = repository.data
 
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>

@@ -1,34 +1,23 @@
 package ru.netology.nmedia.adapter
 
-import android.content.Intent
-import android.hardware.camera2.CaptureFailure
-import android.net.Uri
-import android.os.Bundle
-import android.security.keystore.UserNotAuthenticatedException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.MediaController
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.Group
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.CardPostBinding
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.activity.scaleNumbers
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.enumeration.AttachmentType
-import androidx.navigation.fragment.findNavController
 import androidx.paging.PagingDataAdapter
-import kotlinx.coroutines.launch
-import kotlin.Boolean
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.scaleNumbers
+import ru.netology.nmedia.databinding.CardAdBinding
+import ru.netology.nmedia.databinding.CardPostBinding
+import ru.netology.nmedia.dto.Ad
+import ru.netology.nmedia.dto.FeedItem
+import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.enumeration.AttachmentType
 
 interface OnInteractionListener {
     fun onLike(post: Post)
@@ -43,16 +32,46 @@ interface OnInteractionListener {
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
 ) :
-    PagingDataAdapter<Post, PostViewHolder>(PostDiffCallback) {
+    PagingDataAdapter<FeedItem, RecyclerView.ViewHolder>(PostDiffCallback) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(view, onInteractionListener)
+    override fun getItemViewType(position: Int): Int =
+        when (getItem(position)) {
+            is Ad -> R.layout.card_ad
+            is Post -> R.layout.card_post
+            null -> error("unknown item type")
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        when (viewType) {
+            R.layout.card_post -> {
+                val view = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                PostViewHolder(view, onInteractionListener)
+            }
+            R.layout.card_ad -> {
+                val view = CardAdBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                AdViewHolder(view)
+            }
+            else -> error("unknown view type: $viewType")
+        }
+
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (val item = getItem(position)) {
+            is Ad -> (holder as? AdViewHolder)?.bind(item)
+            is Post -> (holder as? PostViewHolder)?.bind(item)
+            null -> error("unknown item type")
+        }
     }
+}
 
-    override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position) ?: return
-        holder.bind(post)
+class AdViewHolder(
+    private val binding: CardAdBinding
+) : RecyclerView.ViewHolder(binding.root) {
+
+    fun bind (ad: Ad) {
+        Glide.with(binding.image)
+            .load("http://10.0.2.2:9999/media/${ad.image}")
+            .into(binding.image)
     }
 }
 
@@ -149,9 +168,16 @@ class PostViewHolder(
     }
 }
 
-object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post) = oldItem.id == newItem.id
+object PostDiffCallback : DiffUtil.ItemCallback<FeedItem>() {
+    override fun areItemsTheSame(oldItem: FeedItem, newItem: FeedItem) : Boolean {
+        if (oldItem::class != newItem::class) {
+            return false
+        }
+        return oldItem.id == newItem.id
+    }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post) = oldItem == newItem
+    override fun areContentsTheSame(oldItem: FeedItem, newItem: FeedItem): Boolean {
+        return oldItem == newItem
+    }
 }
 

@@ -26,6 +26,8 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
+import ru.netology.nmedia.adapter.PostLoadingViewHolder
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -112,27 +114,28 @@ class FeedFragment : Fragment() {
 
         }
         adapter = PostsAdapter(listener)
-        binding.list.adapter = adapter
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter { adapter.retry() },
+            footer = PostLoadingStateAdapter { adapter.retry() }
+                )
 
-        lifecycleScope.launchWhenCreated {
-            viewModel.data.collectLatest {
-                adapter.submitData(it)
-            }
-        }
+                lifecycleScope.launchWhenCreated {
+                    viewModel.data.collectLatest {
+                        adapter.submitData(it)
+                    }
+                }
 
-        authViewModel.data.observe(viewLifecycleOwner) {
-            adapter.refresh()
-        }
+                authViewModel.data.observe(viewLifecycleOwner) {
+                    adapter.refresh()
+                }
 
-        lifecycleScope.launchWhenCreated {
-            adapter.loadStateFlow.collectLatest {
+                lifecycleScope.launchWhenCreated {
+                    adapter.loadStateFlow.collectLatest {
 
-                binding.swipeRefresh.isRefreshing = it.refresh is LoadState.Loading
-                            || it.append is LoadState.Loading
-                            || it.prepend is LoadState.Loading
-            }
+                        binding.swipeRefresh.isRefreshing = it.refresh is LoadState.Loading
+                    }
 
-        }
+                }
 
 //        lifecycleScope.launch {
 //            viewModel.hasNewPosts.collect {
@@ -144,96 +147,98 @@ class FeedFragment : Fragment() {
 //            }
 //        }
 
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) {
-                        viewModel.loadPosts()
+                viewModel.state.observe(viewLifecycleOwner) { state ->
+                    binding.progress.isVisible = state.loading
+                    if (state.error) {
+                        Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.retry_loading) {
+                                viewModel.loadPosts()
+                            }
+                            .show()
                     }
-                    .show()
-            }
-            binding.swipeRefresh.isRefreshing = state.refreshing
-        }
+                    binding.swipeRefresh.isRefreshing = state.refreshing
+                }
 
-        binding.newerPost.setOnClickListener {
-            viewModel.onNewerPostButtonClick()
+                binding.newerPost.setOnClickListener {
+                    viewModel.onNewerPostButtonClick()
 //            println(viewModel.viewListOfPosts.value.size)
 //            adapter.submitList(viewModel.viewListOfPosts.value)
-            lifecycleScope.launch {
-                delay(2000)
-                binding.list.smoothScrollToPosition(0)
-            }
-            binding.newerPost.visibility = View.GONE
-        }
+                    lifecycleScope.launch {
+                        delay(2000)
+                        binding.list.smoothScrollToPosition(0)
+                    }
+                    binding.newerPost.visibility = View.GONE
+                }
 
-        binding.swipeRefresh.setOnRefreshListener {
-            adapter.refresh()
-        }
-
-        binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-        }
-
-        return binding.root
-    }
-
-    private fun setMenu() {
-        val menu = binding.feedToolBar.menu
-        viewModel.isAuthenticated.onEach {
-            menu.setGroupVisible(R.id.unauthenticated, !it)
-            menu.setGroupVisible(R.id.authenticated, it)
-        }.launchIn(lifecycleScope)
-
-        menu.findItem(R.id.signout).setOnMenuItemClickListener {
-            val dialog = AlertDialog.Builder(requireActivity())
-                .setPositiveButton(R.string.yes) { dialog, _ ->
-                    AppAuth.getInstance().removeAuth()
+                binding.swipeRefresh.setOnRefreshListener {
                     adapter.refresh()
                 }
-                .setNegativeButton(R.string.no) { _, _ -> }
-                .setTitle(R.string.sign_out_confirmation)
-                .create()
 
-            dialog.show()
+                binding.fab.setOnClickListener {
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+                }
 
-            true
-        }
+                return binding.root
+            }
 
-        menu.findItem(R.id.signin).setOnMenuItemClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
-            true
-        }
+                    private fun setMenu() {
+                val menu = binding.feedToolBar.menu
+                viewModel.isAuthenticated.onEach {
+                    menu.setGroupVisible(R.id.unauthenticated, !it)
+                    menu.setGroupVisible(R.id.authenticated, it)
+                }.launchIn(lifecycleScope)
 
-        menu.findItem(R.id.signup).setOnMenuItemClickListener {
+                menu.findItem(R.id.signout).setOnMenuItemClickListener {
+                    val dialog = AlertDialog.Builder(requireActivity())
+                        .setPositiveButton(R.string.yes) { dialog, _ ->
+                            AppAuth.getInstance().removeAuth()
+                            adapter.refresh()
+                        }
+                        .setNegativeButton(R.string.no) { _, _ -> }
+                        .setTitle(R.string.sign_out_confirmation)
+                        .create()
 
-            true
-        }
+                    dialog.show()
+
+                    true
+                }
+
+                menu.findItem(R.id.signin).setOnMenuItemClickListener {
+                    findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+                    true
+                }
+
+                menu.findItem(R.id.signup).setOnMenuItemClickListener {
+
+                    true
+                }
+            }
     }
-}
 
-@SuppressLint("DefaultLocale")
-fun scaleNumbers(number: String): String {
-    var scaledNumber = number
-    if (number.toInt() >= 1_000_000) {
-        if (number.toInt() / 1_000_000 <= 9) {
-            scaledNumber =
-                (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
-                    .toString() + "M"
-        } else {
-            scaledNumber =
-                (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
-                    .toInt().toString() + "M"
+    @SuppressLint("DefaultLocale")
+    fun scaleNumbers(number: String): String {
+        var scaledNumber = number
+        if (number.toInt() >= 1_000_000) {
+            if (number.toInt() / 1_000_000 <= 9) {
+                scaledNumber =
+                    (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
+                        .toString() + "M"
+            } else {
+                scaledNumber =
+                    (number.toDouble() / 1_000_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
+                        .toInt().toString() + "M"
+            }
+        } else if (number.toInt() >= 1_000) {
+            if (number.toInt() / 1_000 <= 9) {
+                scaledNumber =
+                    (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
+                        .toString() + "K"
+            } else {
+                scaledNumber =
+                    (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
+                        .toInt()
+                        .toString() + "K"
+            }
         }
-    } else if (number.toInt() >= 1_000) {
-        if (number.toInt() / 1_000 <= 9) {
-            scaledNumber = (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN)
-                .toString() + "K"
-        } else {
-            scaledNumber =
-                (number.toDouble() / 1_000).toBigDecimal().setScale(1, RoundingMode.DOWN).toInt()
-                    .toString() + "K"
-        }
+        return scaledNumber
     }
-    return scaledNumber
-}
